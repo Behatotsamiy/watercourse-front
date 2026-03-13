@@ -1,8 +1,8 @@
-import type { ElementType } from "react";
 
-export type AppRoute = {
+export interface AppRoute {
   path: string;
-  component: ElementType;
-  layout?: ElementType;
+  component: React.ComponentType<any>;
+  layout?: React.ComponentType<{ children: React.ReactNode }>;
   isPrivate?: boolean;
 };
+
