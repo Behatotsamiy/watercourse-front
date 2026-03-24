@@ -1,24 +1,25 @@
 import type { AppRoute } from "./routes.types";
 import { AuthLayout } from "../Layout/LoginLayout";
-
+import { BaseLayout } from "../Layout/BaseLayout";
+import { GuestLayout } from "../Layout/GuestLayout";
 
 import HomePage from "../../Pages/HomePage/HomePage";
 import DashboardPage from "../../Pages/DashboardPage/DashboardPage";
 import LoginPage from "../../Pages/AuthPage/AuthPage";
-import { BaseLayout } from "../Layout/BaseLayout";
-import { GuestLayout } from "../Layout/GuestLayout";
 import StudentsPage from "../../Pages/StudentsPage/StudentsPage";
 import Groupspage from "../../Pages/GroupsPage/GroupsPage";
 import TeachersPage from "../../Pages/TeachersPage/TeachersPage";
 import CoursesPage from "../../Pages/CoursesPage/CoursesPage";
 import PaymentsPage from "../../Pages/PaymentsPage/PaymentsPage";
 import SettingsPage from "../../Pages/SettingsPage/SettingsPage";
-
+import TeacherDashboard from "../../Pages/DashboardPage/TeachersDashboard";
+import GroupPage from "../../Pages/GroupsPage/GroupPage";
+import MyGroupsPage from "../../Pages/GroupsPage/MyGroupsPage";
 
 export const routes: AppRoute[] = [
   {
     path: "/",
-      layout: GuestLayout,
+    layout: GuestLayout,
     component: HomePage,
   },
   {
@@ -37,12 +38,11 @@ export const routes: AppRoute[] = [
     layout: BaseLayout,
     component: StudentsPage,
     isPrivate: true,
-
   },
   {
     path: "/groups",
     layout: BaseLayout,
-    component:Groupspage,
+    component: Groupspage,
     isPrivate: true,
   },
   {
@@ -58,9 +58,9 @@ export const routes: AppRoute[] = [
     isPrivate: true,
   },
   {
-    path :"/payments",
+    path: "/payments",
     layout: BaseLayout,
-    component:PaymentsPage,
+    component: PaymentsPage,
     isPrivate: true,
   },
   {
@@ -68,5 +68,25 @@ export const routes: AppRoute[] = [
     layout: BaseLayout,
     component: SettingsPage,
     isPrivate: true,
+  },
+  {
+    path: "/teacher/dashboard",
+    layout: BaseLayout,
+    component: TeacherDashboard,
+    isPrivate: true,
+  },
+  {
+    path: "/teacher/group/:id",
+    layout: BaseLayout,
+    component: GroupPage,
+    isPrivate: true,
+  },
+  {
+    path: "/teacher/groups",
+    layout: BaseLayout,
+    component: MyGroupsPage,
+    isPrivate: true,
   }
+
+
 ];
