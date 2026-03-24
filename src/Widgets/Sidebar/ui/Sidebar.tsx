@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { NavLink } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { sidebarItems } from "../model/SidebarItems";
+import { useAuth } from "../../../Shared/hooks/auth";
 
 // Контейнер с динамической шириной
 const SidebarContainer = styled.aside<{ $isCollapsed: boolean }>`
@@ -35,7 +36,11 @@ const CollapseButton = styled.button`
 `;
 
 export const Sidebar = () => {
+  const user = useAuth()
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const allowedMenuItems = sidebarItems.filter(item => 
+    item.roles.includes(user.role)
+  );
 
   return (
     <SidebarContainer
@@ -63,7 +68,7 @@ export const Sidebar = () => {
 
       {/* Навигация */}
       <nav className="flex flex-col gap-2 flex-1">
-        {sidebarItems.map((item) => (
+        {allowedMenuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
