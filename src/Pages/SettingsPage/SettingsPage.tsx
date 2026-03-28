@@ -5,6 +5,7 @@ import {
   Eye, EyeOff, Sun, Moon, Monitor
 } from 'lucide-react';
 import { api } from '../../Shared/API/base';
+import { LogoutButton } from '../../Shared/ui/logoutButton';
 
 const THEMES = [
   { id: 'light', label: 'Light', icon: Sun },
@@ -42,6 +43,8 @@ const SettingsPage = () => {
 
   // Theme
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -148,6 +151,9 @@ const SettingsPage = () => {
               {tab.label}
             </button>
           ))}
+               <div className="border-t border-slate-100 pt-4">
+        <LogoutButton isCollapsed={isCollapsed} />
+      </div>
         </div>
 
         {/* CONTENT */}
@@ -353,6 +359,7 @@ const SettingsPage = () => {
               </div>
             </div>
           )}
+     
 
           {/* ── UNDER DEVELOPMENT ── */}
           {(activeTab === 'notifications' || activeTab === 'billing') && (

@@ -1,4 +1,5 @@
 import { Home, Users, GraduationCap, BookOpen, Settings, GroupIcon ,BadgeDollarSign } from "lucide-react";
+import { LogoutButton } from "../../../Shared/ui/logoutButton";
 
 export const sidebarItems = [
   {
@@ -16,9 +17,9 @@ export const sidebarItems = [
 
   },
   {
-    title: "Teachers",
+    title: "Staff",
     icon: GraduationCap,
-    path: "/teachers",
+    path: "/staff",
      roles: ['owner', 'admin'],
   },
   {
@@ -31,7 +32,7 @@ export const sidebarItems = [
     title: "Courses",
     icon: BookOpen,
     path: "/courses",
-        roles: ['owner', 'admin'],
+    roles: ['owner', 'admin'],
   },
   {
     title: "Payments",
@@ -57,5 +58,6 @@ export const sidebarItems = [
     path: "/teacher/groups",
     roles: ['teacher'],
   },
+ 
 
 ];  

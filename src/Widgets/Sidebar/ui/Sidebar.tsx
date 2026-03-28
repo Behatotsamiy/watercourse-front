@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { sidebarItems } from "../model/SidebarItems";
 import { useAuth } from "../../../Shared/hooks/auth";
+import { LogoutButton } from "../../../Shared/ui/logoutButton";
+import { span } from "framer-motion/client";
 
 // Контейнер с динамической шириной
 const SidebarContainer = styled.aside<{ $isCollapsed: boolean }>`
@@ -41,7 +43,16 @@ export const Sidebar = () => {
   const allowedMenuItems = sidebarItems.filter(item => 
     item.roles.includes(user.role)
   );
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  const isTeacher = user.role === 'teacher';
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/auth?mode=login', { replace: true });
+  };
   return (
     <SidebarContainer
       $isCollapsed={isCollapsed}
@@ -92,6 +103,35 @@ export const Sidebar = () => {
           </NavLink>
         ))}
       </nav>
+   {isTeacher && (
+  <div className="mt-auto pt-4 border-slate-50">
+    <button
+      onClick={handleLogout}
+      className={`flex items-center gap-3 py-4 text-slate-400 hover:text-red-500 hover:bg-red-20 transition-all rounded-2xl group ${
+        isCollapsed ? 'justify-center px-0' : 'px-4 w-full'
+      }`}
+      title={isCollapsed ? "Выйти" : ""} // Подсказка при наведении в узком режиме
+    >
+      <div className={`flex items-center justify-center rounded-xl transition-colors ${
+        isCollapsed ? 'w-12 h-12 ' : 'p-2 group-hover:bg-red-100'
+      }`}>
+        <LogOut 
+          size={20} 
+          className="group-hover:translate-x-1 transition-transform" 
+        />
+      </div>
+
+      {/* Анимированное скрытие текста */}
+      <div className={`overflow-hidden transition-all duration-300 flex items-center ${
+        isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100 ml-1'
+      }`}>
+        <span className="font-black uppercase tracking-widest text-[11px] whitespace-nowrap">
+          Выйти
+        </span>
+      </div>
+    </button>
+  </div>
+)}
     </SidebarContainer>
   );
 };
