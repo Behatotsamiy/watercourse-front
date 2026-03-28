@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Plus, Filter, Phone, Wallet, X, Trash2, Edit2, UserPlus, CreditCard, ChevronRight } from 'lucide-react';
+import { Search, Plus, Filter, Phone, X, Trash2, Edit2, UserPlus, CreditCard, Calendar } from 'lucide-react';
 import { api } from '../../Shared/API/base';
 
 interface Group { id: string; groupName: string; }
-interface Payment { id: string; amount: number; method: string; comment?: string; createdAt: string; }
+interface Payment { id: string; amount: number; method: string; comment?: string; createdAt: string; groupId?: string; }
 interface Student {
   id: string;
   stfirstName: string;
@@ -14,7 +14,7 @@ interface Student {
 }
 
 interface StudentForm { stfirstName: string; stlastName: string; phone: string; }
-interface PaymentForm { amount: string; method: string; comment: string; }
+interface PaymentForm { amount: string; method: string; comment: string; groupId: string; }
 
 const METHOD_LABELS: any = { cash: 'Наличные', card: 'Карта', transfer: 'Перевод' };
 const METHOD_COLORS: any = {
@@ -30,35 +30,30 @@ const StudentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  // Drawer
   const [selected, setSelected] = useState<Student | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
 
-  // Create student modal
   const [createOpen, setCreateOpen] = useState(false);
   const [studentForm, setStudentForm] = useState<StudentForm>({ stfirstName: '', stlastName: '', phone: '' });
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
-  // Edit modal
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState<StudentForm>({ stfirstName: '', stlastName: '', phone: '' });
   const [editing, setEditing] = useState(false);
 
-  // Add to group modal
   const [addGroupOpen, setAddGroupOpen] = useState(false);
   const [addGroupId, setAddGroupId] = useState('');
   const [addingGroup, setAddingGroup] = useState(false);
 
-  // Payment modal
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [paymentForm, setPaymentForm] = useState<PaymentForm>({ amount: '', method: 'cash', comment: '' });
+  const [paymentForm, setPaymentForm] = useState<PaymentForm>({ amount: '', method: 'cash', comment: '', groupId: '' });
   const [paying, setPaying] = useState(false);
   const [paymentError, setPaymentError] = useState('');
 
-  // Delete
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [removingGroupId, setRemovingGroupId] = useState<string | null>(null);
 
   const fetchStudents = async () => {
     const { data } = await api.get('/students');
@@ -74,13 +69,10 @@ const StudentsPage = () => {
   };
 
   useEffect(() => {
-    Promise.all([
-      api.get('/students'),
-      api.get('/groups'),
-    ]).then(([s, g]) => {
-      setStudents(s.data); setFiltered(s.data);
-      setGroups(g.data);
-    }).catch(console.error).finally(() => setLoading(false));
+    Promise.all([api.get('/students'), api.get('/groups')])
+      .then(([s, g]) => { setStudents(s.data); setFiltered(s.data); setGroups(g.data); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -92,9 +84,12 @@ const StudentsPage = () => {
     ));
   }, [search, students]);
 
-  const getBalance = (s: Student) => s.payments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+  const getLastPaymentDate = (s: Student) => {
+    if (!s.payments?.length) return null;
+    const sorted = [...s.payments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return new Date(sorted[0].createdAt).toLocaleDateString('ru-RU');
+  };
 
-  // Create
   const handleCreate = async () => {
     if (!studentForm.stfirstName || !studentForm.stlastName || !studentForm.phone) { setCreateError('Заполните все поля'); return; }
     setCreating(true); setCreateError('');
@@ -108,12 +103,12 @@ const StudentsPage = () => {
     } finally { setCreating(false); }
   };
 
-  // Edit
   const openEdit = () => {
     if (!selected) return;
     setEditForm({ stfirstName: selected.stfirstName, stlastName: selected.stlastName, phone: selected.phone });
     setEditOpen(true);
   };
+
   const handleEdit = async () => {
     if (!selected) return;
     setEditing(true);
@@ -126,7 +121,6 @@ const StudentsPage = () => {
     finally { setEditing(false); }
   };
 
-  // Add to group
   const handleAddGroup = async () => {
     if (!selected || !addGroupId) return;
     setAddingGroup(true);
@@ -134,27 +128,35 @@ const StudentsPage = () => {
       await api.post(`/groups/${addGroupId}/students`, { studentId: selected.id });
       setAddGroupOpen(false);
       fetchStudent(selected.id);
+      fetchStudents();
     } catch (e: any) { console.error(e); }
     finally { setAddingGroup(false); }
   };
 
-  // Remove from group
   const handleRemoveGroup = async (groupId: string) => {
     if (!selected) return;
+    setRemovingGroupId(groupId);
     try {
       await api.delete(`/groups/${groupId}/students/${selected.id}`);
       fetchStudent(selected.id);
+      fetchStudents();
     } catch (e: any) { console.error(e); }
+    finally { setRemovingGroupId(null); }
   };
 
-  // Payment
   const handlePayment = async () => {
     if (!paymentForm.amount || !selected) { setPaymentError('Введите сумму'); return; }
     setPaying(true); setPaymentError('');
     try {
-      await api.post('/payments', { studentId: selected.id, amount: Number(paymentForm.amount), method: paymentForm.method, comment: paymentForm.comment });
+      await api.post('/payments', {
+        studentId: selected.id,
+        amount: Number(paymentForm.amount),
+        method: paymentForm.method,
+        comment: paymentForm.comment || undefined,
+        groupId: paymentForm.groupId || undefined,
+      });
       setPaymentOpen(false);
-      setPaymentForm({ amount: '', method: 'cash', comment: '' });
+      setPaymentForm({ amount: '', method: 'cash', comment: '', groupId: '' });
       fetchStudent(selected.id);
       fetchStudents();
     } catch (e: any) {
@@ -162,7 +164,6 @@ const StudentsPage = () => {
     } finally { setPaying(false); }
   };
 
-  // Delete
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
@@ -216,17 +217,13 @@ const StudentsPage = () => {
             <tr className="bg-slate-50/50 border-b border-slate-100">
               <th className="px-8 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Student</th>
               <th className="px-6 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Groups</th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Balance</th>
+              <th className="px-6 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Last Payment</th>
               <th className="px-6 py-5 text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
             {filtered.map(student => (
-              <tr
-                key={student.id}
-                onClick={() => fetchStudent(student.id)}
-                className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
-              >
+              <tr key={student.id} onClick={() => fetchStudent(student.id)} className="hover:bg-blue-50/30 transition-colors group cursor-pointer">
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 border border-slate-200">
@@ -253,11 +250,15 @@ const StudentsPage = () => {
                     </div>
                   ) : <span className="text-slate-300 text-sm">—</span>}
                 </td>
-                <td className="px-6 py-5 font-mono font-bold">
-                  <div className={`flex items-center gap-1 ${getBalance(student) < 0 ? 'text-red-500' : 'text-slate-700'}`}>
-                    <Wallet size={16} className="opacity-40" />
-                    {getBalance(student).toLocaleString('ru-RU')} сум
-                  </div>
+                <td className="px-6 py-5">
+                  {getLastPaymentDate(student) ? (
+                    <div className="flex items-center gap-2 text-slate-600 font-medium text-sm">
+                      <Calendar size={14} className="text-blue-400" />
+                      {getLastPaymentDate(student)}
+                    </div>
+                  ) : (
+                    <span className="text-slate-300 text-sm">—</span>
+                  )}
                 </td>
                 <td className="px-6 py-5 text-right" onClick={e => e.stopPropagation()}>
                   <button
@@ -277,13 +278,12 @@ const StudentsPage = () => {
         </table>
       </div>
 
-      {/* ─── DRAWER ─────────────────────────────────────────── */}
+      {/* ─── DRAWER ─── */}
       {selected && (
         <>
           <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={() => setSelected(null)} />
           <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
 
-            {/* Drawer Header */}
             <div className="p-8 border-b border-slate-100 flex items-start justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl font-black">
@@ -305,25 +305,15 @@ const StudentsPage = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8">
-
               {drawerLoading ? (
                 <div className="flex items-center justify-center h-32 text-slate-400 font-bold">Loading...</div>
               ) : (
                 <>
-                  {/* Balance */}
-                  <div className="bg-slate-50 rounded-2xl p-6">
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Общий баланс</p>
-                    <p className="text-3xl font-black text-slate-900">{getBalance(selected).toLocaleString('ru-RU')} <span className="text-sm font-medium text-slate-400">сум</span></p>
-                  </div>
-
                   {/* Groups */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-black text-slate-900 uppercase tracking-widest text-xs">Группы</h3>
-                      <button
-                        onClick={() => { setAddGroupId(''); setAddGroupOpen(true); }}
-                        className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline"
-                      >
+                      <button onClick={() => { setAddGroupId(''); setAddGroupOpen(true); }} className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline">
                         <UserPlus size={14} /> Добавить
                       </button>
                     </div>
@@ -332,8 +322,12 @@ const StudentsPage = () => {
                         {selected.group.map(g => (
                           <div key={g.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-2xl">
                             <span className="font-bold text-slate-700">{g.groupName}</span>
-                            <button onClick={() => handleRemoveGroup(g.id)} className="text-slate-300 hover:text-red-500 transition">
-                              <X size={14} />
+                            <button
+                              onClick={() => handleRemoveGroup(g.id)}
+                              disabled={removingGroupId === g.id}
+                              className="text-slate-300 hover:text-red-500 transition disabled:opacity-50"
+                            >
+                              {removingGroupId === g.id ? '...' : <X size={14} />}
                             </button>
                           </div>
                         ))}
@@ -346,7 +340,11 @@ const StudentsPage = () => {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-black text-slate-900 uppercase tracking-widest text-xs">Платежи</h3>
                       <button
-                        onClick={() => { setPaymentForm({ amount: '', method: 'cash', comment: '' }); setPaymentError(''); setPaymentOpen(true); }}
+                        onClick={() => {
+                          setPaymentForm({ amount: '', method: 'cash', comment: '', groupId: selected.group?.[0]?.id ?? '' });
+                          setPaymentError('');
+                          setPaymentOpen(true);
+                        }}
                         className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline"
                       >
                         <CreditCard size={14} /> Принять оплату
@@ -354,17 +352,19 @@ const StudentsPage = () => {
                     </div>
                     {selected.payments?.length ? (
                       <div className="flex flex-col gap-2">
-                        {selected.payments.map(p => (
-                          <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-2xl">
-                            <div>
-                              <p className="font-black text-slate-900">{Number(p.amount).toLocaleString('ru-RU')} сум</p>
-                              <p className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleDateString('ru-RU')}</p>
+                        {[...selected.payments]
+                          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                          .map(p => (
+                            <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-2xl">
+                              <div>
+                                <p className="font-black text-slate-900">{Number(p.amount).toLocaleString('ru-RU')} сум</p>
+                                <p className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleDateString('ru-RU')}</p>
+                              </div>
+                              <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase ${METHOD_COLORS[p.method]}`}>
+                                {METHOD_LABELS[p.method]}
+                              </span>
                             </div>
-                            <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase ${METHOD_COLORS[p.method]}`}>
-                              {METHOD_LABELS[p.method]}
-                            </span>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     ) : <p className="text-slate-400 text-sm">Платежей нет</p>}
                   </div>
@@ -375,7 +375,7 @@ const StudentsPage = () => {
         </>
       )}
 
-      {/* ─── CREATE STUDENT MODAL ───────────────────────────── */}
+      {/* ─── CREATE MODAL ─── */}
       {createOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
@@ -423,15 +423,13 @@ const StudentsPage = () => {
         </div>
       )}
 
-      {/* ─── EDIT MODAL ─────────────────────────────────────── */}
+      {/* ─── EDIT MODAL ─── */}
       {editOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditOpen(false)} />
           <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md mx-4 p-8 z-10">
             <button onClick={() => setEditOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-slate-900">Edit Student</h2>
-            </div>
+            <div className="mb-8"><h2 className="text-3xl font-black text-slate-900">Edit Student</h2></div>
             <div className="flex flex-col gap-4">
               {[
                 { label: 'First Name', key: 'stfirstName' },
@@ -455,15 +453,13 @@ const StudentsPage = () => {
         </div>
       )}
 
-      {/* ─── ADD TO GROUP MODAL ─────────────────────────────── */}
+      {/* ─── ADD TO GROUP MODAL ─── */}
       {addGroupOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAddGroupOpen(false)} />
           <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-sm mx-4 p-8 z-10">
             <button onClick={() => setAddGroupOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-slate-900">Add to Group</h2>
-            </div>
+            <div className="mb-8"><h2 className="text-3xl font-black text-slate-900">Add to Group</h2></div>
             <div className="flex flex-col gap-4">
               <select
                 className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white"
@@ -473,8 +469,7 @@ const StudentsPage = () => {
                 <option value="">Выберите группу</option>
                 {groups
                   .filter(g => !selected?.group?.some(sg => sg.id === g.id))
-                  .map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)
-                }
+                  .map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
               </select>
               <button onClick={handleAddGroup} disabled={addingGroup || !addGroupId} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition disabled:opacity-50">
                 {addingGroup ? 'Добавление...' : 'Add to Group'}
@@ -484,7 +479,7 @@ const StudentsPage = () => {
         </div>
       )}
 
-      {/* ─── PAYMENT MODAL ──────────────────────────────────── */}
+      {/* ─── PAYMENT MODAL ─── */}
       {paymentOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPaymentOpen(false)} />
@@ -495,6 +490,24 @@ const StudentsPage = () => {
               <p className="text-slate-400 font-medium mt-1">{selected?.stfirstName} {selected?.stlastName}</p>
             </div>
             <div className="flex flex-col gap-4">
+
+              {/* Group selector */}
+              {selected?.group && selected.group.length > 0 && (
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">
+                    For Group <span className="text-slate-300 normal-case font-medium">(необязательно)</span>
+                  </label>
+                  <select
+                    className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white"
+                    value={paymentForm.groupId}
+                    onChange={e => setPaymentForm({ ...paymentForm, groupId: e.target.value })}
+                  >
+                    <option value="">Не указывать</option>
+                    {selected.group.map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Amount (sum)</label>
                 <input

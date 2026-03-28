@@ -8,13 +8,13 @@ import DashboardPage from "../../Pages/DashboardPage/DashboardPage";
 import LoginPage from "../../Pages/AuthPage/AuthPage";
 import StudentsPage from "../../Pages/StudentsPage/StudentsPage";
 import Groupspage from "../../Pages/GroupsPage/GroupsPage";
-import TeachersPage from "../../Pages/TeachersPage/TeachersPage";
 import CoursesPage from "../../Pages/CoursesPage/CoursesPage";
 import PaymentsPage from "../../Pages/PaymentsPage/PaymentsPage";
 import SettingsPage from "../../Pages/SettingsPage/SettingsPage";
 import TeacherDashboard from "../../Pages/DashboardPage/TeachersDashboard";
 import GroupPage from "../../Pages/GroupsPage/GroupPage";
 import MyGroupsPage from "../../Pages/GroupsPage/MyGroupsPage";
+import StaffPage from "../../Pages/TeachersPage/StaffPage";
 
 export const routes: AppRoute[] = [
   {
@@ -32,6 +32,7 @@ export const routes: AppRoute[] = [
     layout: BaseLayout,
     component: DashboardPage,
     isPrivate: true,
+    roles: ['owner', 'admin'], // Доступ только для владельца и админа
   },
   {
     path: "/students",
@@ -46,9 +47,9 @@ export const routes: AppRoute[] = [
     isPrivate: true,
   },
   {
-    path: "/teachers",
+    path: "/staff",
     layout: BaseLayout,
-    component: TeachersPage,
+    component: StaffPage,
     isPrivate: true,
   },
   {
@@ -86,6 +87,7 @@ export const routes: AppRoute[] = [
     layout: BaseLayout,
     component: MyGroupsPage,
     isPrivate: true,
+    roles: ['teacher'], // Доступ только для учителей
   }
 
 

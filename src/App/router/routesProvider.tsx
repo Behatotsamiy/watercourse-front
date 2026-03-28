@@ -17,20 +17,12 @@ export const RoutesProvider = () => {
         );
 
         const element = route.isPrivate ? (
-          <ProtectedRoute>
-            {PageWithLayout}
-          </ProtectedRoute>
+          <ProtectedRoute roles={route.roles}>{PageWithLayout}</ProtectedRoute>
         ) : (
           PageWithLayout
         );
 
-        return (
-          <Route
-            key={index}
-            path={route.path}
-            element={element}
-          />
-        );
+        return <Route key={index} path={route.path} element={element} />;
       })}
 
       <Route path="*" element={<div>404</div>} />
