@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { DollarSign, Filter, Search, CreditCard, Banknote, Plus, X, Trash2 } from 'lucide-react';
+import  { useEffect, useState } from 'react';
+import { DollarSign, Filter, Search, CreditCard, Banknote, X, Trash2 } from 'lucide-react';
 import { api } from '../../Shared/API/base';
 
 interface Payment {
@@ -78,7 +78,6 @@ const PaymentsPage = () => {
   const totalRevenue = payments.reduce((s, p) => s + Number(p.amount), 0);
   const avgTicket = payments.length ? Math.round(totalRevenue / payments.length) : 0;
 
-  const openModal = () => { setForm({ studentId: '', amount: '', method: 'cash', comment: '' }); setError(''); setModalOpen(true); };
   const closeModal = () => { setModalOpen(false); setError(''); };
 
   const handleCreate = async () => {

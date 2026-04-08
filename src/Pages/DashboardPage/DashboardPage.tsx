@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Users, GraduationCap, Layers, Banknote, Clock, ChevronRight } from "lucide-react";
+import { Users, GraduationCap, Layers, Banknote, Clock } from "lucide-react";
 import { api } from "../../Shared/API/base";
 
 const PageContainer = styled.div.attrs({ className: "space-y-6" })``;

@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import styled from "styled-components";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { sidebarItems } from "../model/SidebarItems";
 import { useAuth } from "../../../Shared/hooks/auth";
-import { LogoutButton } from "../../../Shared/ui/logoutButton";
-import { span } from "framer-motion/client";
 
 // Контейнер с динамической шириной
 const SidebarContainer = styled.aside<{ $isCollapsed: boolean }>`
@@ -44,7 +42,6 @@ export const Sidebar = () => {
     item.roles.includes(user.role)
   );
   const navigate = useNavigate();
-  const location = useLocation();
 
   const isTeacher = user.role === 'teacher';
 
