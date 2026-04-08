@@ -1,262 +1,196 @@
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Zap,
-  Users,
-  Star,
   ArrowRight,
-  Play,
-  CheckCircle2,
   BarChart3,
-  Shield,
   Globe,
-  MessageSquare,
   Plus,
+  Menu,
+  X,
+  Layout,
+  ShieldCheck,
 } from "lucide-react";
 
 const HomePage = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleStart = () => navigate("/auth"); // Твой путь к авторизации
+
   return (
-    <div className="bg-white text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-600">
-      {/* --- BACKGROUND DECOR --- */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1000px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-50 via-transparent to-transparent opacity-70" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-      </div>
-
-      {/* --- HERO SECTION (Ultra Wide) --- */}
-      <section className="relative pt-32 pb-20 px-10 md:px-20">
-        <div className="max-w-[1800px] mx-auto grid lg:grid-cols-2 gap-20 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-sm font-bold mb-8">
-              <Zap size={16} fill="currentColor" />
-              <span> Умная автоматизация</span>
+    <div className="bg-[#fcfcfd] text-slate-900 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
+      {/* --- NAVIGATION --- */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-slate-100">
+        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+          <span className=" font-black text-xl">W</span>
             </div>
-            <h1 className="text-8xl font-black tracking-tight leading-[0.9] mb-10">
-              Управляйте образованием 
-              <br /> <span className=" text-8xl text-blue-600">умнее</span> <br /> 
-            </h1>
-          
-
-
-            <p className="text-2xl text-slate-500 mb-12 max-w-2xl leading-relaxed">
-              Единая экосистема для управления студентами, учителями и
-              финансами. Построено для тех, кто ценит скорость и порядок.
-            </p>
-            <div className="flex flex-wrap gap-6">
-              <button className="h-20 px-12 bg-blue-600 text-white rounded-2xl font-bold text-xl hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-200 transition-all flex items-center gap-3">
-                Создать аккаунт <ArrowRight />
-              </button>
-              <button className="h-20 px-12 bg-white border-2 border-slate-100 text-slate-900 rounded-2xl font-bold text-xl hover:bg-slate-50 transition-all flex items-center gap-3">
-                <Play fill="currentColor" size={20} /> Демо
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Интерактивное превью (Wide Image) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="relative"
-          >
-            <div className="relative z-10 bg-white p-4 rounded-[40px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border border-slate-100">
-              <div className="bg-slate-50 rounded-[32px] aspect-video flex items-center justify-center overflow-hidden border border-slate-100">
-                <div className="grid grid-cols-12 w-full h-full">
-                  <div className="col-span-3 border-r border-slate-200 p-4 space-y-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="h-4 bg-slate-200 rounded-full w-full opacity-50"
-                      />
-                    ))}
-                  </div>
-                  <div className="col-span-9 p-8">
-                    <div className="flex gap-4 mb-8">
-                      <div className="h-20 w-1/3 bg-blue-100 rounded-2xl" />
-                      <div className="h-20 w-1/3 bg-purple-100 rounded-2xl" />
-                      <div className="h-20 w-1/3 bg-orange-100 rounded-2xl" />
-                    </div>
-                    <div className="h-40 bg-white border border-slate-200 rounded-2xl" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Плавающие плашки статистики */}
-            <div className="absolute -top-10 -right-10 bg-white p-6 rounded-3xl shadow-xl border border-slate-50 animate-bounce-slow">
-              <p className="text-sm font-bold text-slate-400">
-                ACTIVE STUDENTS
-              </p>
-              <p className="text-3xl font-black text-blue-600">2,481</p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* --- TRUST MARQUEE --- */}
-      {/* <div className="w-full border-y border-slate-100 py-16 overflow-hidden">
-        <div className="max-w-[1800px] mx-auto px-10">
-          <p className="text-center text-slate-400 font-bold mb-10 tracking-widest uppercase text-sm">Нам доверяют лидеры рынка</p>
-          <div className="flex justify-between items-center gap-12 opacity-40 grayscale">
-            <h2 className="text-4xl font-black uppercase">IT-Park</h2>
-            <h2 className="text-4xl font-black uppercase">PDP Academy</h2>
-            <h2 className="text-4xl font-black uppercase">Najot Ta'lim</h2>
-            <h2 className="text-4xl font-black uppercase">Proweb</h2>
-            <h2 className="text-4xl font-black uppercase">Udevs</h2>
-          </div>
-        </div>
-      </div> */}
-
-      {/* --- BENTO FEATURES (Ultra Wide) --- */}
-      <section className="py-32 px-10 md:px-20 max-w-[1800px] mx-auto">
-        <h2 className="text-5xl font-black mb-20">
-          Всё, что нужно для <br /> полного контроля.
-        </h2>
-
-        <div className="grid grid-cols-12 gap-6 h-[700px]">
-          <div className="col-span-7 bg-slate-900 rounded-[40px] p-12 text-white relative overflow-hidden group">
-            <div className="relative z-10">
-              <BarChart3 size={48} className="text-blue-500 mb-6" />
-              <h3 className="text-4xl font-bold mb-4">Глубокая аналитика</h3>
-              <p className="text-slate-400 text-xl max-w-sm">
-                Следите за каждым тийином выручки и эффективностью каждой
-                группы.
-              </p>
-            </div>
-            <div className="absolute bottom-0 right-0 w-2/3 h-2/3 bg-gradient-to-br from-blue-500/20 to-transparent rounded-tl-[100px]" />
+            <span className="ml-3 text-blue-600 font-bold text-xl tracking-tight overflow-hidden whitespace-nowrap">
+              Watercourse
+            </span>
           </div>
 
-          <div className="col-span-5 bg-blue-600 rounded-[40px] p-12 text-white flex flex-col justify-between">
-            <Globe size={48} className="opacity-50" />
-            <div>
-              <h3 className="text-4xl font-bold mb-4">Глобальный доступ</h3>
-              <p className="text-blue-100 text-xl">
-                Управляйте филиалами по всему миру из одного окна.
-              </p>
-            </div>
-          </div>
-
-          <div className="col-span-4 bg-slate-50 border border-slate-100 rounded-[40px] p-10 flex flex-col justify-between">
-            <Users size={40} className="text-slate-900" />
-            <p className="text-2xl font-bold leading-tight italic">
-              "CRM, которая реально понимает специфику образования."
-            </p>
-          </div>
-
-          <div className="col-span-8 bg-white border-2 border-slate-900 rounded-[40px] p-10 flex items-center justify-between">
-            <div>
-              <h3 className="text-3xl font-black mb-2 uppercase">
-                Ready to scale?
-              </h3>
-              <p className="text-slate-500">
-                Подключите модуль маркетинга прямо сейчас.
-              </p>
-            </div>
-            <button className="w-20 h-20 bg-slate-900 text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform">
-              <Plus size={32} />
+          <div className="hidden md:flex items-center gap-8">
+            <button
+              onClick={handleStart}
+              className="text-sm font-black text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest"
+            >
+              Login
+            </button>
+            <button
+              onClick={handleStart}
+              className="h-12 px-8 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
+            >
+              Get Started
             </button>
           </div>
+
+          <button
+            className="md:hidden p-2"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      <section className="relative pt-40 md:pt-52 pb-20 px-6">
+        <div className="max-w-[1400px] mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-6xl md:text-[120px] font-black tracking-tighter leading-[0.85] mb-8 uppercase italic">
+              Control <br />{" "}
+              <span className="text-blue-600 text-5xl md:text-[100px]">
+                Everything.
+              </span>
+            </h1>
+
+            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] md:text-sm mb-12">
+              Система управления обучением без лишних слов.
+            </p>
+
+            <button
+              onClick={handleStart}
+              className="group h-20 px-12 bg-slate-900 text-white rounded-2xl font-black text-xl md:text-2xl uppercase italic tracking-tighter hover:bg-blue-600 transition-all flex items-center gap-4 mx-auto shadow-2xl shadow-slate-200 active:scale-95"
+            >
+              Начать работу{" "}
+              <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+            </button>
+          </motion.div>
+
+          {/* Screenshot Mockup */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-20 max-w-5xl mx-auto bg-white p-2 rounded-[32px] border border-slate-100 shadow-2xl"
+          >
+            <div className="bg-slate-50 rounded-[24px] aspect-video border border-slate-50 flex items-center justify-center text-slate-200 font-black italic uppercase tracking-widest">
+              [ Dashboard Preview ]
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* --- PRICING --- */}
-      <section className="py-32 px-10 md:px-20 bg-slate-50">
-        <div className="max-w-[1800px] mx-auto text-center">
-          <h2 className="text-6xl font-black mb-20">Прозрачные цены</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <PriceCard
-              title="Lite"
-              price="0"
-              features={["До 50 студентов", "Базовые отчеты", "1 филиал"]}
-            />
-            <PriceCard
-              title="Professional"
-              price="49"
-              popular
-              features={[
-                "Безлимитно студентов",
-                "AI Аналитика",
-                "Все интеграции",
-              ]}
-            />
-            <PriceCard
-              title="Enterprise"
-              price="199"
-              features={[
-                "Индивидуальный дизайн",
-                "Личный менеджер",
-                "API доступ",
-              ]}
-            />
+      {/* --- CORE FEATURES (BENTO) --- */}
+      <section className="py-20 px-6 max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-10 bg-white border border-slate-100 rounded-[32px] hover:border-blue-200 transition-colors">
+            <BarChart3 size={32} className="text-blue-600 mb-6" />
+            <h3 className="text-xl font-black uppercase italic mb-2 tracking-tighter">
+              Analytics
+            </h3>
+            <p className="text-slate-400 font-medium text-sm leading-relaxed">
+              Полный контроль финансов и посещаемости в один клик.
+            </p>
           </div>
+
+          <div className="p-10 bg-slate-900 rounded-[32px] text-white">
+            <Layout size={32} className="text-blue-400 mb-6" />
+            <h3 className="text-xl font-black uppercase italic mb-2 tracking-tighter">
+              Structure
+            </h3>
+            <p className="text-slate-400 font-medium text-sm leading-relaxed">
+              Удобные группы, курсы и расписание. Всё под рукой.
+            </p>
+          </div>
+
+          <div className="p-10 bg-white border border-slate-100 rounded-[32px] hover:border-blue-200 transition-colors">
+            <ShieldCheck size={32} className="text-blue-600 mb-6" />
+            <h3 className="text-xl font-black uppercase italic mb-2 tracking-tighter">
+              Reliability
+            </h3>
+            <p className="text-slate-400 font-medium text-sm leading-relaxed">
+              Безопасное хранение данных и быстрый доступ 24/7.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- SIMPLE CTA --- */}
+      <section className="py-20 px-6 text-center">
+        <div className="max-w-[800px] mx-auto bg-blue-600 rounded-[48px] p-12 md:p-20 text-white shadow-2xl shadow-blue-200">
+          <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter mb-8 leading-none">
+            Ready to scale your center?
+          </h2>
+          <button
+            onClick={handleStart}
+            className="h-16 px-10 bg-white text-blue-600 rounded-xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-all"
+          >
+            Get Access Now
+          </button>
         </div>
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="py-20 px-10 md:px-20 border-t border-slate-100">
-        <div className="max-w-[1800px] mx-auto flex flex-wrap justify-between gap-10">
-          <div className="max-w-xs">
-            <h2 className="text-3xl font-black text-blue-600 mb-6">
+      <footer
+        id="footer"
+        className="py-20 px-6 border-t border-slate-100 bg-white"
+      >
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-2">
+            <h2 className="text-3xl font-black text-blue-600 mb-6 italic uppercase tracking-tighter">
               Watercourse.
             </h2>
-            <p className="text-slate-500 font-medium">
-              Сделано с любовью для образовательных проектов будущего.
+            <p className="text-slate-500 font-medium max-w-sm text-lg leading-relaxed">
+              Мы создаем софт, который позволяет учителям учить, а бизнесу —
+              расти. Самое мощное решение на рынке Узбекистана.
             </p>
           </div>
-          <div className="flex gap-20">
-            <FooterList title="Продукт" items={["Функции", "Цены", "Кейсы"]} />
-            <FooterList title="Компания" items={["О нас", "Карьера", "Блог"]} />
-            <FooterList
-              title="Поддержка"
-              items={["Документация", "API", "Чат"]}
-            />
-          </div>
+          <FooterList
+            title="Продукт"
+            items={["Возможности", "Для школ", "Для репетиторов", "Обновления"]}
+          />
+          <FooterList
+            title="Связь"
+            items={["Telegram", "Instagram", "Помощь", "API"]}
+          />
+        </div>
+        <div className="max-w-[1400px] mx-auto mt-20 pt-10 border-t border-slate-50 text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] flex justify-between">
+          <span>© 2026 Watercourse CRM</span>
+          <span className="text-slate-400">Built for champions</span>
         </div>
       </footer>
     </div>
   );
 };
 
-// Вспомогательные компоненты
-const PriceCard = ({ title, price, features, popular }: any) => (
-  <div
-    className={`p-12 rounded-[40px] text-left transition-all ${popular ? "bg-slate-900 text-white scale-105 shadow-2xl" : "bg-white border border-slate-200"}`}
-  >
-    <h3 className="text-2xl font-bold mb-4">{title}</h3>
-    <div className="flex items-baseline gap-1 mb-8">
-      <span className="text-5xl font-black">${price}</span>
-      <span className="opacity-50">/месяц</span>
-    </div>
-    <ul className="space-y-4 mb-10">
-      {features.map((f: string) => (
-        <li key={f} className="flex items-center gap-3 font-medium">
-          <CheckCircle2
-            size={18}
-            className={popular ? "text-blue-400" : "text-blue-600"}
-          />{" "}
-          {f}
-        </li>
-      ))}
-    </ul>
-    <button
-      className={`w-full py-5 rounded-2xl font-bold transition-all ${popular ? "bg-blue-600 hover:bg-blue-500 text-white" : "bg-slate-100 hover:bg-slate-200"}`}
-    >
-      Выбрать план
-    </button>
-  </div>
-);
-
 const FooterList = ({ title, items }: any) => (
   <div className="flex flex-col gap-6">
-    <h4 className="font-bold text-slate-900 uppercase tracking-widest text-sm">
+    <h4 className="font-black text-slate-900 uppercase tracking-[0.2em] text-[10px]">
       {title}
     </h4>
-    <ul className="space-y-4">
+    <ul className="space-y-3">
       {items.map((i: string) => (
         <li
           key={i}
-          className="text-slate-500 font-medium hover:text-blue-600 cursor-pointer"
+          className="text-slate-400 font-bold text-sm hover:text-blue-600 cursor-pointer transition-colors uppercase tracking-tighter"
         >
           {i}
         </li>

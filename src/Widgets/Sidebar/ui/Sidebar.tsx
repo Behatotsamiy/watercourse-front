@@ -107,7 +107,7 @@ export const Sidebar = () => {
   <div className="mt-auto pt-4 border-slate-50">
     <button
       onClick={handleLogout}
-      className={`flex items-center gap-3 py-4 text-slate-400 hover:text-red-500 hover:bg-red-20 transition-all rounded-2xl group ${
+      className={`flex items-center gap-3 py-4 text-slate-400 hover:text-red-500 hover:bg-red-20cle transition-all rounded-2xl group ${
         isCollapsed ? 'justify-center px-0' : 'px-4 w-full'
       }`}
       title={isCollapsed ? "Выйти" : ""} // Подсказка при наведении в узком режиме
