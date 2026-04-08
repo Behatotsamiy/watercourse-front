@@ -1,5 +1,4 @@
 import { Home, Users, GraduationCap, BookOpen, Settings, GroupIcon ,BadgeDollarSign } from "lucide-react";
-import { LogoutButton } from "../../../Shared/ui/logoutButton";
 
 export const sidebarItems = [
   {

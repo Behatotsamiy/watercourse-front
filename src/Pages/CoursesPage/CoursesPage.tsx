@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, BookOpen, Clock, ChevronRight, Layers, X, Trash2 } from 'lucide-react';
+import  { useEffect, useState } from 'react';
+import { Plus, BookOpen, Clock,  Layers, X, Trash2 } from 'lucide-react';
 import { api } from '../../Shared/API/base';
 
 const COLORS = ['bg-yellow-400', 'bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500'];

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import {
   Building2, Users, Bell, ShieldCheck,
   Globe, CreditCard, Save, Camera, Trash2,
@@ -44,7 +44,7 @@ const SettingsPage = () => {
   // Theme
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 

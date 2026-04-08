@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, X, Users, Save, MessageCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Check, X,  MessageCircle, AlertCircle } from 'lucide-react';
 import { api } from '../../Shared/API/base';
 
 const GroupPage = () => {
