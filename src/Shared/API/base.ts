@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'https://watercourse-back.onrender.com', // 👈 https + /api
+  baseURL: 'https://watercourse-back.onrender.com/api', // 👈 https + /api
   withCredentials: true, // 👈 для refreshToken cookie
 });
 
