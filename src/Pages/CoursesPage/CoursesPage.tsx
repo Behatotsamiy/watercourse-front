@@ -74,14 +74,14 @@ const CoursesPage = () => {
     <div className="max-w-[1600px] mx-auto">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-12">
+      <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-5xl font-black italic uppercase tracking-tighter">Courses</h1>
+          <h1 className="text-3xl font-black text-slate-900">Courses</h1>
           <p className="text-slate-500 font-medium mt-2">Каталог образовательных программ</p>
         </div>
         <button
           onClick={openModal}
-          className="h-16 px-8 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all flex items-center gap-3 shadow-xl shadow-slate-200"
+          className="h-16 px-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all flex items-center gap-3 shadow-xl shadow-slate-200"
         >
           <Plus size={24} /> Create Course
         </button>

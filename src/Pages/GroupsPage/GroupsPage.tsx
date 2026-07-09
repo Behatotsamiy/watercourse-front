@@ -180,21 +180,20 @@ const GroupsPage = () => {
       {/* HEADER */}
 
       <div className="flex justify-between items-center mb-10">
-        <div>
-          <h1 className="text-4xl font-black italic uppercase">Groups</h1>
+  <div>
+    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">
+      {groups.length} активных групп
+    </p>
+    <h1 className="text-3xl font-black text-slate-900">Groups</h1>
+  </div>
 
-          <p className="text-slate-500 font-medium mt-1">
-            {groups.length} активных групп
-          </p>
-        </div>
-
-        <button
-          onClick={openModal}
-          className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center gap-2"
-        >
-          <Plus size={18} /> New Group
-        </button>
-      </div>
+  <button
+    onClick={openModal}
+    className="flex items-center gap-2 bg-slate-900 text-white px-5 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 text-sm"
+  >
+    <Plus size={16} /> New Group
+  </button>
+</div>
 
       {/* GRID */}
 
