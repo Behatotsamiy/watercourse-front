@@ -99,14 +99,14 @@ const StaffPage = () => {
     <div className="max-w-[1600px] mx-auto">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-12">
+      <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-5xl font-black italic uppercase tracking-tighter">Staff</h1>
+          <h1 className="text-3xl font-black text-slate-900">Staff</h1>
           <p className="text-slate-500 font-medium mt-2">Ваша команда: {staff.length} сотрудников</p>
         </div>
         <button
           onClick={openModal}
-          className="h-16 px-8 bg-gradient-to-br from-blue-600 to-indigo-900 text-white rounded-2xl font-bold hover:opacity-90 transition-all flex items-center gap-3 shadow-xl shadow-blue-100"
+          className="h-16 px-5 bg-gradient-to-br from-blue-600 to-indigo-900 text-white rounded-2xl font-bold hover:opacity-90 transition-all flex items-center gap-3 shadow-xl shadow-blue-100"
         >
           <Plus size={24} /> Add Staff
         </button>

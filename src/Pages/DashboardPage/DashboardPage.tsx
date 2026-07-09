@@ -23,7 +23,6 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const today = new Date().getDay() || 7; // 1=Пн ... 7=Вс
 
     Promise.all([
       api.get("/students"),
@@ -48,13 +47,26 @@ const DashboardPage = () => {
       setRecentPayments(payments.data.slice(-5).reverse());
 
       // Занятия сегодня
+      const DAY_MAP: Record<string, number> = {
+  'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+  'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7
+};
+
+const today = new Date().getDay() || 7; // 1=Пн...7=Вс
+
       const classes = groups.data.filter((g: any) =>
-        g.schedules?.some((s: any) => s.dayOfWeek === today)
-      ).map((g: any) => ({
-        ...g,
-        schedule: g.schedules.find((s: any) => s.dayOfWeek === today),
-      }));
-      setTodayClasses(classes);
+  g.schedules?.some((s: any) => {
+    const d = typeof s.dayOfWeek === 'string' ? DAY_MAP[s.dayOfWeek] : s.dayOfWeek;
+    return d === today;
+  })
+).map((g: any) => ({
+  ...g,
+  schedule: g.schedules.find((s: any) => {
+    const d = typeof s.dayOfWeek === 'string' ? DAY_MAP[s.dayOfWeek] : s.dayOfWeek;
+    return d === today;
+  }),
+}));
+setTodayClasses(classes);
 
     }).catch(console.error).finally(() => setLoading(false));
   }, []);

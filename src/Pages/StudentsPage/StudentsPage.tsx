@@ -182,12 +182,12 @@ const StudentsPage = () => {
       {/* HEADER */}
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 mb-2">Students</h1>
+          <h1 className="text-2xl font-black text-slate-900 mb-2">Students</h1>
           <p className="text-slate-500 font-medium">Всего: {students.length} студентов</p>
         </div>
         <button
           onClick={() => { setStudentForm({ stfirstName: '', stlastName: '', phone: '' }); setSelectedGroupId(''); setCreateError(''); setCreateOpen(true); }}
-          className="h-14 px-8 bg-blue-600 text-white rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+          className="h-14  px-1 bg-blue-600 text-white text-0.5xl rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
         >
           <Plus size={20} /> Add Student
         </button>
