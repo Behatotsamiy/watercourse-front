@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Clock, ArrowUpRight, Plus, X, Trash2, Search, Filter, BookOpen } from "lucide-react";
+import { Users, Clock, ArrowUpRight, Plus, X,  BookOpen } from "lucide-react";
 import { api } from "../../Shared/API/base";
 
 interface Schedule {
@@ -58,9 +58,9 @@ const GroupsPage = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, ] = useState("");
   const [selectedCourseFilter, setSelectedCourseFilter] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, ] = useState(false);
 
   const [groupForm, setGroupForm] = useState<GroupForm>({
     groupName: "",
@@ -153,17 +153,17 @@ const GroupsPage = () => {
     }));
   };
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    try {
-      await api.delete(`/groups/${id}`);
-      setGroups((prev) => prev.filter((g) => g.id !== id));
-    } catch (e: any) {
-      console.error(e.response?.data?.message || "Ошибка при удалении");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  // const handleDelete = async (id: string) => {
+  //   setDeletingId(id);
+  //   try {
+  //     await api.delete(`/groups/${id}`);
+  //     setGroups((prev) => prev.filter((g) => g.id !== id));
+  //   } catch (e: any) {
+  //     console.error(e.response?.data?.message || "Ошибка при удалении");
+  //   } finally {
+  //     setDeletingId(null);
+  //   }
+  // };
 
   const filteredGroups = groups.filter((group) => {
     const matchesSearch = 
