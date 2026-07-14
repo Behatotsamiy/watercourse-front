@@ -1,15 +1,15 @@
-import { Home, Users, BookOpen, Settings, GroupIcon ,BadgeDollarSign } from "lucide-react";
+import { Home, Users, BookOpen, Settings, GroupIcon ,BadgeDollarSign , LucideDollarSign} from "lucide-react";
 
 export const bottombarItems = () => [
   {
-    title: "Dashboard",
+    title: "Asosiy",
     label:"Dashboard",
     icon: Home,
     path: "/dashboard",
     roles: ['owner', 'admin'],
   },
   {
-    title: "Students",
+    title: "O'quvchilar",
     icon: Users,
     path: "/students",
     roles: ['owner', 'admin'],
@@ -17,37 +17,39 @@ export const bottombarItems = () => [
   },
 
   {
-    title:"Groups",
+    title:"Guruhlar",
     icon: GroupIcon,
     path: "/groups",
     roles: ['owner', 'admin'],
   },
+  // {
+  //   title: "Courses",
+  //   icon: BookOpen,
+  //   path: "/courses",
+  //   roles: ['owner', 'admin'],
+  // },
   {
-    title: "Courses",
-    icon: BookOpen,
-    path: "/courses",
-    roles: ['owner', 'admin'],
-  },
-  {
-    title: "Payments",
+    title: "Hisobot",
     icon: BadgeDollarSign,
     path: "/payments",
     roles: ['owner', 'admin'],
   },
+
   {
-    title: "Settings",
+    title: "Sozlamalar",
     icon: Settings,
     path: "/settings",
     roles: ['owner', 'admin'],
   },
-      {
-    title: "Dashboard",
+
+  {
+    title: "Asosiy",
     icon: Home,
     path: "/teacher/dashboard",
     roles: ['teacher'],
   },
   {
-    title:"My groups",
+    title:"Guruhlarim",
     icon: GroupIcon,
     path: "/teacher/groups",
     roles: ['teacher'],

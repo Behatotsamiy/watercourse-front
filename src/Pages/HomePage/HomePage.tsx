@@ -23,10 +23,10 @@ const HomePage = () => {
         <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-          <span className=" font-black text-xl">W</span>
+          <span className=" font-black text-xl">EMS</span>
             </div>
             <span className="ml-3 text-blue-600 font-bold text-xl tracking-tight overflow-hidden whitespace-nowrap">
-              Watercourse
+              EMS
             </span>
           </div>
 
@@ -41,7 +41,7 @@ const HomePage = () => {
               onClick={handleStart}
               className="h-12 px-8 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
             >
-              Get Started
+              Xoziroq boshlang
             </button>
           </div>
 
@@ -63,21 +63,25 @@ const HomePage = () => {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-6xl md:text-[120px] font-black tracking-tighter leading-[0.85] mb-8 uppercase italic">
-              Control <br />{" "}
+              Easy <br />{" "}
               <span className="text-blue-600 text-5xl md:text-[100px]">
-                Everything.
+                mangement
               </span>
-            </h1>
+              <br />
+               <span className="text-blue-600 text-5xl md:text-[100px]">
+                system.
+              </span>
+            </h1> 
 
-            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] md:text-sm mb-12">
-              Система управления обучением без лишних слов.
+            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[40px] md:text-sm mb-12">
+              Oson boshqaruv tizimi 
             </p>
 
             <button
               onClick={handleStart}
               className="group h-20 px-12 bg-slate-900 text-white rounded-2xl font-black text-xl md:text-2xl uppercase italic tracking-tighter hover:bg-blue-600 transition-all flex items-center gap-4 mx-auto shadow-2xl shadow-slate-200 active:scale-95"
             >
-              Начать работу{" "}
+              Sinab ko'rish{" "}
               <ArrowRight className="group-hover:translate-x-2 transition-transform" />
             </button>
           </motion.div>
@@ -104,7 +108,7 @@ const HomePage = () => {
               Analytics
             </h3>
             <p className="text-slate-400 font-medium text-sm leading-relaxed">
-              Полный контроль финансов и посещаемости в один клик.
+              Moliya va davomat nazorati
             </p>
           </div>
 
@@ -114,7 +118,7 @@ const HomePage = () => {
               Structure
             </h3>
             <p className="text-slate-400 font-medium text-sm leading-relaxed">
-              Удобные группы, курсы и расписание. Всё под рукой.
+              Qulay va sodda interfeys, barcha kerakli funksiyalar bir joyda.
             </p>
           </div>
 
@@ -124,7 +128,7 @@ const HomePage = () => {
               Reliability
             </h3>
             <p className="text-slate-400 font-medium text-sm leading-relaxed">
-              Безопасное хранение данных и быстрый доступ 24/7.
+              Ma'lumotlaringiz xavfsiz va ishonchli saqlanadi.
             </p>
           </div>
         </div>
@@ -134,13 +138,13 @@ const HomePage = () => {
       <section className="py-20 px-6 text-center">
         <div className="max-w-[800px] mx-auto bg-blue-600 rounded-[48px] p-12 md:p-20 text-white shadow-2xl shadow-blue-200">
           <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter mb-8 leading-none">
-            Ready to scale your center?
+            Biznesingizni rivojlantirishga tayyormisiz?
           </h2>
           <button
             onClick={handleStart}
             className="h-16 px-10 bg-white text-blue-600 rounded-xl font-black uppercase tracking-widest text-sm hover:scale-105 transition-all"
           >
-            Get Access Now
+          Xoziroq boshlang
           </button>
         </div>
       </section>
@@ -153,20 +157,19 @@ const HomePage = () => {
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <h2 className="text-3xl font-black text-blue-600 mb-6 italic uppercase tracking-tighter">
-              Watercourse.
+              EMS.
             </h2>
             <p className="text-slate-500 font-medium max-w-sm text-lg leading-relaxed">
-              Мы создаем софт, который позволяет учителям учить, а бизнесу —
-              расти. Самое мощное решение на рынке Узбекистана.
+              EMS - bu oson boshqaruv tizimi bo'lib, u sizning biznesingizni samarali boshqarishga yordam beradi. Bizning platformamiz orqali siz moliya, davomat va boshqa muhim ma'lumotlarni bir joyda kuzatishingiz mumkin.
             </p>
           </div>
           <FooterList
             title="Продукт"
-            items={["Возможности", "Для школ", "Для репетиторов", "Обновления"]}
+            items={["Imkoniyatlar", "Maktablar uchun", "Repetyitorlar uchun", "Yamgiliklar", "Narxlar"]}
           />
           <FooterList
             title="Связь"
-            items={["Telegram", "Instagram", "Помощь", "API"]}
+            items={["Telegram", "Instagram", "Yordam", "API"]}
           />
         </div>
         <div className="max-w-[1400px] mx-auto mt-20 pt-10 border-t border-slate-50 text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] flex justify-between">
