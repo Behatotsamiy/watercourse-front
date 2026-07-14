@@ -1,4 +1,4 @@
-import { Home, Users, BookOpen, Settings, GroupIcon ,BadgeDollarSign , LucideDollarSign} from "lucide-react";
+import { Home, Users, Settings, GroupIcon ,BadgeDollarSign } from "lucide-react";
 
 export const bottombarItems = () => [
   {
