@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Clock, ArrowUpRight, Plus, X,  BookOpen } from "lucide-react";
+import { Users, Clock, ArrowUpRight, Plus, X, BookOpen } from "lucide-react";
 import { api } from "../../Shared/API/base";
 
 interface Schedule {
