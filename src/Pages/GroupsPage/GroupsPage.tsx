@@ -74,7 +74,6 @@ const GroupsPage = () => {
   });
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchGroups = () => {
     api
