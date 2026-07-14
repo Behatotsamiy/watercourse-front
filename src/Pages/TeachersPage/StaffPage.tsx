@@ -66,7 +66,7 @@ const StaffPage = () => {
 
   const handleCreate = async () => {
     if (!form.firstName || !form.lastName || !form.phone || !form.password) {
-      setError('Заполните все поля');
+      setError('Barcha maydonlar to\'ldirilishi kerak');
       return;
     }
     setCreating(true); setError('');
@@ -101,14 +101,14 @@ const StaffPage = () => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Staff</h1>
-          <p className="text-slate-500 font-medium mt-2">Ваша команда: {staff.length} сотрудников</p>
+          <h1 className="text-3xl font-black text-slate-900">Hodimlar</h1>
+          <p className="text-slate-500 font-medium mt-2">Mening xodimlarim: {staff.length} kishi</p>
         </div>
         <button
           onClick={openModal}
           className="h-16 px-5 bg-gradient-to-br from-blue-600 to-indigo-900 text-white rounded-2xl font-bold hover:opacity-90 transition-all flex items-center gap-3 shadow-xl shadow-blue-100"
         >
-          <Plus size={24} /> Add Staff
+          <Plus size={24} /> Qo'shish
         </button>
       </div>
 
@@ -124,7 +124,7 @@ const StaffPage = () => {
                 : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-400'
             }`}
           >
-            {r === 'all' ? `All (${staff.length})` : r === 'teacher' ? `Teachers (${staff.filter(s => s.role === 'teacher').length})` : `Admins (${staff.filter(s => s.role === 'admin').length})`}
+            {r === 'all' ? `Barchasi (${staff.length})` : r === 'teacher' ? `O'qituvchilar (${staff.filter(s => s.role === 'teacher').length})` : `Adminlar (${staff.filter(s => s.role === 'admin').length})`}
           </button>
         ))}
       </div>
@@ -163,7 +163,7 @@ const StaffPage = () => {
                 {member.role === 'teacher' && (
                   <div className="mt-2">
                     <span className="px-3 py-1 bg-gradient-to-br from-blue-600 to-indigo-900 text-white rounded-lg text-xs font-black">
-                      {member.groups?.length ?? 0} Groups
+                      {member.groups?.length ?? 0}ta Guruh
                     </span>
                   </div>
                 )}
@@ -196,7 +196,7 @@ const StaffPage = () => {
           <div className="w-20 h-20 rounded-full border-4 border-current flex items-center justify-center mb-4">
             <Plus size={40} />
           </div>
-          <p className="font-black uppercase tracking-tighter text-xl">Add Staff</p>
+          <p className="font-black uppercase tracking-tighter text-xl">Qo'shish</p>
         </div>
       </div>
 
@@ -209,8 +209,8 @@ const StaffPage = () => {
               <X size={18} />
             </button>
             <div className="mb-8">
-              <h2 className="text-3xl font-black text-slate-900">Add Staff</h2>
-              <p className="text-slate-400 font-medium mt-1">Добавьте нового сотрудника</p>
+              <h2 className="text-3xl font-black text-slate-900">Yangi hodim qo'shish</h2>
+              <p className="text-slate-400 font-medium mt-1">Yangi hodim qo'shing</p>
             </div>
             <div className="flex flex-col gap-4">
 
@@ -235,10 +235,10 @@ const StaffPage = () => {
               </div>
 
               {[
-                { label: 'First Name', key: 'firstName', placeholder: 'Камола' },
-                { label: 'Last Name', key: 'lastName', placeholder: 'Юсупова' },
-                { label: 'Phone', key: 'phone', placeholder: '+998901234567' },
-                { label: 'Password', key: 'password', placeholder: '••••••••', type: 'password' },
+                { label: 'Ismi', key: 'firstName', placeholder: 'Камола' },
+                { label: 'Familiyasi', key: 'lastName', placeholder: 'Юсупова' },
+                { label: 'Telefon', key: 'phone', placeholder: '+998901234567' },
+                { label: 'Parol', key: 'password', placeholder: '••••••••', type: 'password' },
               ].map(({ label, key, placeholder, type }) => (
                 <div key={key}>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">{label}</label>
@@ -263,7 +263,7 @@ const StaffPage = () => {
                     : 'bg-gradient-to-br from-purple-600 to-purple-900 hover:opacity-90'
                 }`}
               >
-                {creating ? 'Создание...' : `Add ${form.role === 'teacher' ? 'Teacher' : 'Admin'}`}
+                {creating ? 'Yaratilmoqda...' : `Add ${form.role === 'teacher' ? 'Teacher' : 'Admin'}`}
               </button>
             </div>
           </div>

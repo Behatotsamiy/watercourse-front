@@ -9,7 +9,7 @@ import LoginPage from "../../Pages/AuthPage/AuthPage";
 import StudentsPage from "../../Pages/StudentsPage/StudentsPage";
 import Groupspage from "../../Pages/GroupsPage/GroupsPage";
 import CoursesPage from "../../Pages/CoursesPage/CoursesPage";
-import PaymentsPage from "../../Pages/PaymentsPage/PaymentsPage";
+import PaymentsPage from "../../Pages/PaymentsPage/FinancePage";
 import SettingsPage from "../../Pages/SettingsPage/SettingsPage";
 import TeacherDashboard from "../../Pages/DashboardPage/TeachersDashboard";
 import GroupPage from "../../Pages/GroupsPage/GroupPage";

@@ -2,57 +2,57 @@ import { Home, Users, GraduationCap, BookOpen, Settings, GroupIcon ,BadgeDollarS
 
 export const sidebarItems = [
   {
-    title: "Dashboard",
+    title: "Asosiy",
     label:"Dashboard",
     icon: Home,
     path: "/dashboard",
     roles: ['owner', 'admin'],
   },
   {
-    title: "Students",
+    title: "O'quvchilar",
     icon: Users,
     path: "/students",
     roles: ['owner', 'admin'],
 
   },
   {
-    title: "Staff",
+    title: "Xodimlar",
     icon: GraduationCap,
     path: "/staff",
      roles: ['owner', 'admin'],
   },
   {
-    title:"Groups",
+    title:"Guruhlar",
     icon: GroupIcon,
     path: "/groups",
     roles: ['owner', 'admin'],
   },
   {
-    title: "Courses",
+    title: "Kurslar",
     icon: BookOpen,
     path: "/courses",
     roles: ['owner', 'admin'],
   },
   {
-    title: "Payments",
+    title: "Hisobot",
     icon: BadgeDollarSign,
     path: "/payments",
     roles: ['owner', 'admin'],
   },
   {
-    title: "Settings",
-    icon: Settings,
+    title: "Sozlamalar",
+    icon: Settings, 
     path: "/settings",
     roles: ['owner', 'admin'],
   },
       {
-    title: "Dashboard",
+    title: "Asosiy",
     icon: Home,
     path: "/teacher/dashboard",
     roles: ['teacher'],
   },
   {
-    title:"My groups",
+    title:"Mening Guruhlarim",
     icon: GroupIcon,
     path: "/teacher/groups",
     roles: ['teacher'],

@@ -69,7 +69,7 @@ export const Sidebar = () => {
         </div>
         {!isCollapsed && (
           <span className="ml-3 font-bold text-xl tracking-tight overflow-hidden whitespace-nowrap">
-            Watercourse
+            emsCRM
           </span>
         )}
       </div>
