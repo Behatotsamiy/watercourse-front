@@ -425,7 +425,7 @@ const StudentsPage = () => {
 
       {/* ─── EDIT MODAL ─── */}
       {editOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditOpen(false)} />
           <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md mx-4 p-8 z-10">
             <button onClick={() => setEditOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
@@ -481,7 +481,7 @@ const StudentsPage = () => {
 
       {/* ─── PAYMENT MODAL ─── */}
       {paymentOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPaymentOpen(false)} />
           <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-sm mx-4 p-8 z-10">
             <button onClick={() => setPaymentOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>

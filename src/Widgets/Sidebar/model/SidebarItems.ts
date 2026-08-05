@@ -1,4 +1,4 @@
-import { Home, Users, GraduationCap, BookOpen, Settings, GroupIcon ,BadgeDollarSign } from "lucide-react";
+import { Home, Users, BookOpen, Settings, GroupIcon ,BadgeDollarSign } from "lucide-react";
 
 export const sidebarItems = [
   {
@@ -14,12 +14,6 @@ export const sidebarItems = [
     path: "/students",
     roles: ['owner', 'admin'],
 
-  },
-  {
-    title: "Xodimlar",
-    icon: GraduationCap,
-    path: "/staff",
-     roles: ['owner', 'admin'],
   },
   {
     title:"Guruhlar",

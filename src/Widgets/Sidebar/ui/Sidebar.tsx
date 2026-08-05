@@ -64,9 +64,8 @@ export const Sidebar = () => {
       <div
         className={`mb-10 flex items-center ${isCollapsed ? "justify-center" : "px-2"}`}
       >
-        <div className="w-8 h-8 bg-white rounded-lg flex-shrink-0 flex items-center justify-center">
-          <span className="text-blue-600 font-black text-xl">W</span>
-        </div>
+        {/* <div className="w-8 h-8 bg-white rounded-lg flex-shrink-0 flex items-center justify-center">
+        </div> */}
         {!isCollapsed && (
           <span className="ml-3 font-bold text-xl tracking-tight overflow-hidden whitespace-nowrap">
             emsCRM

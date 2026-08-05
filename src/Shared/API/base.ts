@@ -12,3 +12,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const isAuthPage = window.location.pathname.includes('/auth');
+      if (!isAuthPage) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+        window.location.href = '/auth?mode=login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
