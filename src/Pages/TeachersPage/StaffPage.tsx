@@ -18,7 +18,7 @@ interface StaffMember {
   lastName: string;
   phone: string;
   role: string;
-  groups?: any[];
+  groups: any[];
 }
 
 interface StaffForm {
@@ -81,17 +81,27 @@ const StaffPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    try {
-      await api.delete(`/users/${id}`);
-      setStaff(prev => prev.filter(s => s.id !== id));
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setDeletingId(null);
-    }
-  };
+const handleDelete = async (id: string) => {
+  const member = staff.find(s => s.id === id);
+  
+  // Проверяем есть ли группы у учителя
+  if (member?.role === 'teacher' && member?.groups && member.groups.length > 0) {
+    alert(`❌ Нельзя удалить учителя у которого есть группы!\n\nСначала открепите его от групп:\n${member.groups.map((g: any) => `• ${g.groupName}`).join('\n')}`);
+    return;
+  }
+
+  if (!window.confirm(`Удалить ${member?.firstName} ${member?.lastName}?`)) return;
+
+  setDeletingId(id);
+  try {
+    await api.delete(`/users/${id}`);
+    setStaff(prev => prev.filter(s => s.id !== id));
+  } catch (e: any) {
+    console.error(e);
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   if (loading) return <div className="flex items-center justify-center h-96 text-slate-400 font-bold">Loading...</div>;
 
@@ -137,13 +147,15 @@ const StaffPage = () => {
             className="group bg-white border border-slate-100 p-8 rounded-[40px] hover:shadow-2xl hover:shadow-blue-100 transition-all duration-300 relative overflow-hidden"
           >
             {/* Delete */}
-            <button
-              onClick={() => handleDelete(member.id)}
-              disabled={deletingId === member.id}
-              className="absolute top-6 right-6 p-2 text-slate-300 hover:text-red-500 transition-colors disabled:opacity-50"
-            >
-              <Trash2 size={20} />
-            </button>
+   <button
+    onClick={() => handleDelete(member.id)}
+    disabled={deletingId === member.id}
+    className="absolute top-6 right-6 p-2 text-slate-300 hover:text-red-500 transition-colors disabled:opacity-50"
+    title={member.role === 'teacher' && member.groups?.length > 0 ? 'Сначала открепите от групп' : 'Удалить'}
+  >
+    <Trash2 size={20} className={member.role === 'teacher' && member.groups?.length > 0 ? 'text-slate-200' : ''} />
+  </button>
+
 
             <div className="flex gap-6 mb-8">
               {/* Avatar */}

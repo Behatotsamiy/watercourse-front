@@ -35,18 +35,20 @@ const AuthPage = () => {
     setError("");
   };
 
-  const handleLogin = async () => {
-    setLoading(true); setError("");
-    try {
-      const { data } = await api.post('/auth/login', loginData);
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      const role = data.user.role;
-      window.location.href = role === 'teacher' ? '/teacher/dashboard' : '/dashboard';
-    } catch (e: any) {
-      setError(e.response?.data?.message || 'Ошибка входа');
-    } finally { setLoading(false); }
-  };
+const handleLogin = async () => {
+  setLoading(true); setError("");
+  try {
+    const { data } = await api.post('/auth/login', loginData);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    window.location.href = data.user.role === 'teacher' ? '/teacher/dashboard' : '/dashboard';
+  } catch (e: any) {
+    // 👈 не допускаем interceptor для страницы логина
+    setError(e.response?.data?.message || 'Неверный номер или пароль');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleRegister = async () => {
     setLoading(true); setError("");
