@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Users, GraduationCap, Layers, Banknote, Clock } from "lucide-react";
 import { api } from "../../Shared/API/base";
+import { useNavigate } from 'react-router-dom';
+
 
 const PageContainer = styled.div.attrs({ className: "space-y-6" })``;
 const TopGrid = styled.div.attrs({ className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" })``;
@@ -16,6 +18,7 @@ const METHOD_COLORS: any = {
 const DAYS = ["", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ students: 0, teachers: 0, groups: 0, revenue: 0 });
   const [recentStudents, setRecentStudents] = useState<any[]>([]);
   const [recentPayments, setRecentPayments] = useState<any[]>([]);
@@ -78,10 +81,10 @@ setTodayClasses(classes);
 
       {/* STATS */}
       <TopGrid>
-        <StatCard title="Students" value={stats.students} icon={Users} color="text-blue-600" bg="bg-blue-50" />
-        <StatCard title="Teachers" value={stats.teachers} icon={GraduationCap} color="text-purple-600" bg="bg-purple-50" />
-        <StatCard title="Groups" value={stats.groups} icon={Layers} color="text-orange-600" bg="bg-orange-50" />
-        <StatCard title="Revenue" value={`${stats.revenue.toLocaleString("ru-RU")} сум`} icon={Banknote} color="text-green-600" bg="bg-green-50" />
+        <StatCard title="Students" value={stats.students} icon={Users} color="text-blue-600" bg="bg-blue-50" onClick={() => navigate('/students')} />
+        <StatCard title="Teachers" value={stats.teachers} icon={GraduationCap} color="text-purple-600" bg="bg-purple-50" onClick={() => navigate('/settings/staff')} />
+        <StatCard title="Groups" value={stats.groups} icon={Layers} color="text-orange-600" bg="bg-orange-50" onClick={() => navigate('/groups')} />
+        <StatCard title="Revenue" value={`${stats.revenue.toLocaleString("ru-RU")} сум`} icon={Banknote} color="text-green-600" bg="bg-green-50" onClick={() => navigate('/payments')} />
       </TopGrid>
 
       {/* TODAY'S CLASSES */}
@@ -193,16 +196,17 @@ setTodayClasses(classes);
   );
 };
 
-const StatCard = ({ title, value, icon: Icon, color, bg }: any) => (
-  <Card>
-    <div className="flex items-center gap-4">
-      <div className={`p-3 rounded-xl ${bg} ${color}`}>
-        <Icon size={24} />
-      </div>
-      <div>
-        <p className="text-sm text-slate-500 font-medium">{title}</p>
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
-      </div>
+const StatCard = ({ title, value, icon: Icon, color, bg, onClick }: any) => (
+  <Card
+    onClick={onClick}
+    className={`flex items-center gap-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-all' : ''}`}
+  >
+    <div className={`p-3 rounded-xl ${bg} ${color}`}>
+      <Icon size={24} />
+    </div>
+    <div>
+      <p className="text-sm text-slate-500 font-medium">{title}</p>
+      <p className="text-2xl font-bold text-slate-900">{value}</p>
     </div>
   </Card>
 );
