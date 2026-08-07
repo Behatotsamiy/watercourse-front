@@ -28,6 +28,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 const METHOD_COLORS: Record<string, string> = {
   cash: "#22c55e",
@@ -77,6 +78,7 @@ const StatusPill = ({ method }: { method: string }) => (
 );
 
 const FinancePage = () => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("reports");
   const [payments, setPayments] = useState<Payment[]>([]);
   const [filtered, setFiltered] = useState<Payment[]>([]);
@@ -294,7 +296,7 @@ const FinancePage = () => {
                 </div>
 
                 {/* Expenses - placeholder */}
-                <div className="bg-white rounded-[20px] border border-slate-100 p-5 flex flex-col gap-2">
+                <div className="bg-white rounded-[20px] border border-slate-100 p-5 flex flex-col gap-2 " onClick={() => navigate('/salary')}>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     Xarajat
                   </p>

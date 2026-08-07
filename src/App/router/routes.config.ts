@@ -18,6 +18,7 @@ import StaffPage from "../../Pages/TeachersPage/StaffPage";
 import SettingsGeneral from "../../Pages/SettingsPage/SettingsGeneral";
 import SettingsSecurity from "../../Pages/SettingsPage/SettingsSecurity";
 import SettingsStaff from "../../Pages/SettingsPage/SettingsStaff";
+import SalaryPage from "../../Pages/PaymentsPage/SalaryPage";
 
 export const routes: AppRoute[] = [
   {
@@ -108,6 +109,12 @@ export const routes: AppRoute[] = [
     path: "/settings/staff",
     layout: BaseLayout,
     component: SettingsStaff,
+    isPrivate: true,
+  },
+  {
+    path: "/salary",
+    layout: BaseLayout,
+    component: SalaryPage,
     isPrivate: true,
   },
 ];
