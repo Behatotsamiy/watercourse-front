@@ -4,7 +4,7 @@ import { api } from '../../Shared/API/base';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface Group { id: string; groupName: string; }
-interface Payment { id: string; amount: number; method: string; comment?: string; createdAt: string; }
+interface Payment { id: string; amount: number; method: string; comment?: string; createdAt: string; deletedAt: string; refundReason?: string; }
 interface Student { id: string; stfirstName: string; stlastName: string; phone: string; group?: Group[]; payments?: Payment[]; }
 
 const METHOD_LABELS: Record<string, string> = { cash: 'Наличные', card: 'Карта', transfer: 'Перевод' };
@@ -65,7 +65,7 @@ const StudentsPage = () => {
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [removingGroupId, setRemovingGroupId] = useState<string | null>(null);
-
+  const [deletedPayments, setDeletedPayments] = useState<Payment[]>([]);
   // Modal states
   const [modal, setModal] = useState<'create' | 'edit' | 'addGroup' | 'payment' | 'refund' | null>(null);
   const closeModal = () => setModal(null);
@@ -94,12 +94,17 @@ const StudentsPage = () => {
     setStudents(data); setFiltered(data);
   };
 
-  const fetchStudent = async (id: string) => {
-    setDrawerLoading(true);
-    const { data } = await api.get(`/students/${id}`);
-    setSelected(data);
-    setDrawerLoading(false);
-  };
+const fetchStudent = async (id: string) => {
+  setDrawerLoading(true);
+  const [studentRes, deletedRes] = await Promise.all([
+    api.get(`/students/${id}`),
+    api.get('/payments/deleted'),
+  ]);
+  setSelected(studentRes.data);
+  // Faqat shu studentnikini filter qil
+  setDeletedPayments(deletedRes.data.filter((d: any) => d.studentId === id));
+  setDrawerLoading(false);
+};
 
   useEffect(() => {
     Promise.all([api.get('/students'), api.get('/groups')])
@@ -403,6 +408,31 @@ const StudentsPage = () => {
                   </div>
                 </>
               )}
+
+              {/* O'chirilgan to'lovlar — qizil soya */}
+{deletedPayments.length > 0 && (
+  <div className="mt-2">
+    <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-2">
+      Qaytarilgan to'lovlar
+    </p>
+    {deletedPayments.map(d => (
+      <div key={d.id} className="flex items-center justify-between px-4 py-3 bg-red-50 rounded-2xl border border-red-100 opacity-60">
+        <div>
+          <p className="font-black text-red-500 line-through">
+            {Number(d.amount).toLocaleString('ru-RU')} сум
+          </p>
+          <p className="text-xs text-red-400">
+            {new Date(d.deletedAt).toLocaleDateString('ru-RU')} — qaytarildi
+          </p>
+          {d.refundReason && <p className="text-xs text-red-400">💬 {d.refundReason}</p>}
+        </div>
+        <span className="px-3 py-1 bg-red-100 text-red-500 text-[10px] font-black rounded-xl uppercase">
+          Qaytarilgan
+        </span>
+      </div>
+    ))}
+  </div>
+)}
             </div>
           </div>
         </>

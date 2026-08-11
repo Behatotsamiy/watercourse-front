@@ -13,6 +13,8 @@ import {
   Calendar,
   ArrowRight,
   Shield,
+  Wallet,
+  PieChart as PieChartIcon,
 } from "lucide-react";
 import { api } from "../../Shared/API/base";
 import {
@@ -36,7 +38,7 @@ const METHOD_COLORS: Record<string, string> = {
   transfer: "#a855f7",
 };
 const METHOD_LABELS: Record<string, string> = {
-  cash: "Naqt",
+  cash: "Naqd",
   card: "Karta",
   transfer: "Transfer",
 };
@@ -69,8 +71,8 @@ const StatusPill = ({ method }: { method: string }) => (
   <span
     className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase"
     style={{
-      background: METHOD_COLORS[method] + "15",
-      color: METHOD_COLORS[method],
+      background: (METHOD_COLORS[method] || "#64748b") + "15",
+      color: METHOD_COLORS[method] || "#64748b",
     }}
   >
     {METHOD_LABELS[method] ?? method}
@@ -104,8 +106,6 @@ const FinancePage = () => {
     api
       .get("/payments")
       .then(({ data }) => {
-        console.log("Payments count:", data.length); // 👈
-        console.log("Payments:", data); // 👈
         setPayments(data);
         setFiltered(data);
         setLastUpdated(new Date());
@@ -120,7 +120,7 @@ const FinancePage = () => {
       const [s, m, y] = await Promise.all([
         api.get("/reports/summary"),
         api.get(
-          `/reports/monthly?year=${reportDate.year}&month=${reportDate.month}`,
+          `/reports/monthly?year=${reportDate.year}&month=${reportDate.month}`
         ),
         api.get(`/reports/yearly?year=${reportDate.year}`),
       ]);
@@ -138,6 +138,7 @@ const FinancePage = () => {
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
+
   useEffect(() => {
     if (tab === "reports") fetchReports();
   }, [tab, fetchReports]);
@@ -148,8 +149,8 @@ const FinancePage = () => {
       payments.filter((p) =>
         `${p.student?.stfirstName} ${p.student?.stlastName}`
           .toLowerCase()
-          .includes(q),
-      ),
+          .includes(q)
+      )
     );
   }, [search, payments]);
 
@@ -173,6 +174,7 @@ const FinancePage = () => {
   const avgTicket = payments.length
     ? Math.round(totalRevenue / payments.length)
     : 0;
+
   const pieData = ["cash", "card", "transfer"]
     .map((m) => ({
       name: METHOD_LABELS[m],
@@ -184,7 +186,7 @@ const FinancePage = () => {
     .filter((d) => d.value > 0);
 
   const minutesAgo = Math.floor(
-    (new Date().getTime() - lastUpdated.getTime()) / 60000,
+    (new Date().getTime() - lastUpdated.getTime()) / 60000
   );
 
   const handleDelete = async (id: string) => {
@@ -212,16 +214,13 @@ const FinancePage = () => {
       <div className="flex justify-between items-start py-6 mb-2">
         <div>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-            Финансы
+            Moliya
           </p>
           <h1 className="text-2xl font-black text-slate-900">
             Finans & Hisobot
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Xayrli kun, {user.firstName}! 👋
-          </p>
-          <p className="text-slate-400 text-xs">
-            Bugun moliya holati haqida ma'lumot.
+            Xayrli kun, {user.firstName || "Foydalanuvchi"}! 👋
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -240,14 +239,18 @@ const FinancePage = () => {
       <div className="flex gap-1 mb-6 bg-slate-100 p-1 rounded-2xl w-fit">
         {(
           [
-            ["payments", "To'lovlar"],
             ["reports", "Hisobot"],
+            ["payments", "To'lovlar"],
           ] as const
         ).map(([id, label]) => (
           <button
             key={id}
             onClick={() => setTab(id)}
-            className={`px-5 py-2 rounded-xl font-bold text-sm transition-all ${tab === id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            className={`px-5 py-2 rounded-xl font-bold text-sm transition-all ${
+              tab === id
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
           >
             {label}
           </button>
@@ -258,22 +261,27 @@ const FinancePage = () => {
       {tab === "reports" &&
         (reportsLoading ? (
           <div className="flex items-center justify-center h-64 text-slate-400 font-bold">
-            Yuklanmoqda...
+            Hisobotlar yuklanmoqda...
           </div>
         ) : (
           <>
             {/* SUMMARY CARDS */}
             {summary && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                {/* Revenue card - highlighted */}
-                <div className="bg-white rounded-[20px] border-2 border-green-200 p-5 flex flex-col gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                
+                {/* 1. Oylik Aylanma (Daromad) */}
+                <div className="bg-white rounded-[20px] border border-blue-100 p-4 flex flex-col justify-between shadow-sm">
                   <div className="flex justify-between items-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Daromad
+                      Oylik Aylanma
                     </p>
                     {summary.growth !== 0 && (
                       <span
-                        className={`flex items-center gap-0.5 text-[10px] font-black px-2 py-0.5 rounded-full ${summary.growth > 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}
+                        className={`flex items-center gap-0.5 text-[10px] font-black px-2 py-0.5 rounded-full ${
+                          summary.growth > 0
+                            ? "bg-green-50 text-green-600"
+                            : "bg-red-50 text-red-500"
+                        }`}
                       >
                         {summary.growth > 0 ? (
                           <TrendingUp size={10} />
@@ -284,56 +292,87 @@ const FinancePage = () => {
                       </span>
                     )}
                   </div>
-                  <div className="p-2.5 bg-green-50 rounded-xl w-fit">
-                    <DollarSign size={18} className="text-green-600" />
+                  <div className="p-2 bg-blue-50 rounded-xl w-fit my-2">
+                    <Wallet size={18} className="text-blue-600" />
                   </div>
-                  <p className="text-xl font-black text-slate-900">
-                    {summary.thisMonthRevenue.toLocaleString("ru-RU")} сум
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    {payments.length} to'lov
-                  </p>
+                  <div>
+                    <p className="text-lg font-black text-slate-900">
+                      {Number(summary.thisMonthRevenue || 0).toLocaleString("ru-RU")} <span className="text-xs font-medium text-slate-400">so'm</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Jami tushum</p>
+                  </div>
                 </div>
 
-                {/* Expenses - placeholder */}
-                <div className="bg-white rounded-[20px] border border-slate-100 p-5 flex flex-col gap-2 " onClick={() => navigate('/salary')}>
+                {/* 2. O'qituvchilar Maoshi (Xarajat) */}
+                <div 
+                  onClick={() => navigate('/salary')}
+                  className="bg-white rounded-[20px] border border-rose-100 p-4 flex flex-col justify-between shadow-sm cursor-pointer hover:border-rose-300 transition"
+                >
+                  <div className="flex justify-between items-center">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      O'qituvchi Maoshi
+                    </p>
+                    <ArrowRight size={12} className="text-slate-400" />
+                  </div>
+                  <div className="p-2 bg-rose-50 rounded-xl w-fit my-2">
+                    <PieChartIcon size={18} className="text-rose-500" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-rose-600">
+                      - {Number(summary.totalSalaries || 0).toLocaleString("ru-RU")} <span className="text-xs font-medium text-rose-400">so'm</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Xarajatlar</p>
+                  </div>
+                </div>
+
+                {/* 3. Oylik Sof Foyda */}
+                <div className="bg-emerald-600 text-white rounded-[20px] p-4 flex flex-col justify-between shadow-md shadow-emerald-100">
+                  <p className="text-[10px] font-black text-emerald-200 uppercase tracking-widest">
+                    Oylik Sof Foyda
+                  </p>
+                  <div className="p-2 bg-emerald-500/50 rounded-xl w-fit my-2">
+                    <DollarSign size={18} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-white">
+                      {Number(summary.netProfit || 0).toLocaleString("ru-RU")} <span className="text-xs font-medium text-emerald-200">so'm</span>
+                    </p>
+                    <p className="text-[11px] text-emerald-100 mt-0.5">Aylanma - Maosh</p>
+                  </div>
+                </div>
+
+                {/* 4. Faol O'quvchilar */}
+                <div className="bg-white rounded-[20px] border border-slate-100 p-4 flex flex-col justify-between shadow-sm">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Xarajat
+                    Faol O'quvchilar
                   </p>
-                  <div className="p-2.5 bg-red-50 rounded-xl w-fit">
-                    <TrendingDown size={18} className="text-red-500" />
+                  <div className="p-2 bg-indigo-50 rounded-xl w-fit my-2">
+                    <Users size={18} className="text-indigo-500" />
                   </div>
-                  <p className="text-xl font-black text-slate-900">0 сум</p>
-                  <p className="text-xs text-slate-400">0 to'lov</p>
+                  <div>
+                    <p className="text-lg font-black text-slate-900">
+                      {summary.totalStudents} <span className="text-xs font-medium text-slate-400">ta</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Jami o'quvchilar</p>
+                  </div>
                 </div>
 
-                {/* Students */}
-                <div className="bg-white rounded-[20px] border border-slate-100 p-5 flex flex-col gap-2">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Faol o'quvchilar
-                  </p>
-                  <div className="p-2.5 bg-blue-50 rounded-xl w-fit">
-                    <Users size={18} className="text-blue-500" />
-                  </div>
-                  <p className="text-xl font-black text-slate-900">
-                    {summary.totalStudents}
-                  </p>
-                  <p className="text-xs text-slate-400">Jami o'quvchilar</p>
-                </div>
-
-                {/* Debtors */}
-                <div className="bg-white rounded-[20px] border border-slate-100 p-5 flex flex-col gap-2">
+                {/* 5. To'lamaganlar */}
+                <div className="bg-white rounded-[20px] border border-slate-100 p-4 flex flex-col justify-between shadow-sm">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     To'lamadilar
                   </p>
-                  <div className="p-2.5 bg-orange-50 rounded-xl w-fit">
-                    <Users size={18} className="text-orange-500" />
+                  <div className="p-2 bg-amber-50 rounded-xl w-fit my-2">
+                    <Users size={18} className="text-amber-500" />
                   </div>
-                  <p className="text-xl font-black text-slate-900">
-                    {summary.debtorsCount}
-                  </p>
-                  <p className="text-xs text-slate-400">To'lov talab qiladi</p>
+                  <div>
+                    <p className="text-lg font-black text-amber-600">
+                      {summary.debtorsCount} <span className="text-xs font-medium text-amber-400">nafar</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Qarzdorlar</p>
+                  </div>
                 </div>
+
               </div>
             )}
 
@@ -344,13 +383,10 @@ const FinancePage = () => {
                 <div className="flex justify-between items-start mb-1">
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Kunlik daromad
+                      Kunlik Aylanma ({MONTHS[reportDate.month - 1]})
                     </p>
                     <p className="text-2xl font-black text-slate-900">
-                      {monthly?.payments?.totalRevenue?.toLocaleString(
-                        "ru-RU",
-                      ) ?? 0}{" "}
-                      сум
+                      {monthly?.payments?.totalRevenue?.toLocaleString("ru-RU") ?? 0} so'm
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -376,23 +412,9 @@ const FinancePage = () => {
                   <ResponsiveContainer width="100%" height={200}>
                     <AreaChart data={monthly.payments.graphData}>
                       <defs>
-                        <linearGradient
-                          id="colorRevenue"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#3b82f6"
-                            stopOpacity={0.15}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#3b82f6"
-                            stopOpacity={0}
-                          />
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <XAxis
@@ -401,22 +423,18 @@ const FinancePage = () => {
                         tickFormatter={(d) =>
                           `${parseInt(d.slice(8))} ${MONTHS[reportDate.month - 1].slice(0, 3)}`
                         }
-                        interval={6}
+                        interval={4}
                       />
                       <YAxis
                         tick={{ fontSize: 10, fill: "#94a3b8" }}
                         tickFormatter={(v) =>
-                          v >= 1000000
-                            ? `${v / 1000000}M`
-                            : v >= 1000
-                              ? `${v / 1000}k`
-                              : v
+                          v >= 1000000 ? `${v / 1000000}M` : v >= 1000 ? `${v / 1000}k` : v
                         }
                       />
                       <Tooltip
                         formatter={(v: any) => [
-                          `${Number(v).toLocaleString("ru-RU")} сум`,
-                          "Daromad",
+                          `${Number(v).toLocaleString("ru-RU")} so'm`,
+                          "Tushum",
                         ]}
                         labelFormatter={(l) =>
                           `${l.slice(8)}-${MONTHS[reportDate.month - 1]}`
@@ -467,9 +485,7 @@ const FinancePage = () => {
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <p className="text-2xl font-black text-slate-900">
                           {totalRevenue > 0
-                            ? Math.round(
-                                (pieData[0]?.value / totalRevenue) * 100,
-                              )
+                            ? Math.round((pieData[0]?.value / totalRevenue) * 100)
                             : 0}
                           %
                         </p>
@@ -480,10 +496,7 @@ const FinancePage = () => {
                     </div>
                     <div className="flex flex-col gap-2 mt-4">
                       {pieData.map((d, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between"
-                        >
+                        <div key={i} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <div
                               className="w-2.5 h-2.5 rounded-full"
@@ -495,7 +508,7 @@ const FinancePage = () => {
                           </div>
                           <div className="text-right">
                             <span className="text-xs font-black text-slate-900">
-                              {d.value.toLocaleString("ru-RU")} сум
+                              {d.value.toLocaleString("ru-RU")} so'm
                             </span>
                             <span className="text-[10px] text-slate-400 ml-1">
                               ({Math.round((d.value / totalRevenue) * 100)}%)
@@ -513,39 +526,43 @@ const FinancePage = () => {
               </div>
             </div>
 
-            {/* YEARLY BAR CHART */}
+            {/* ─── YILLIK HISOBOT CARD'LARI VA GRAFIGI ─── */}
             <div className="bg-white rounded-[24px] border border-slate-100 p-6 mb-4">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    {reportDate.year} yil daromadi
+                    {reportDate.year} Yil Natijalari
                   </p>
                   <p className="text-2xl font-black text-slate-900">
-                    {yearly?.payments?.totalRevenue?.toLocaleString("ru-RU") ??
-                      0}{" "}
-                    сум
+                    {yearly?.payments?.totalRevenue?.toLocaleString("ru-RU") ?? 0} <span className="text-sm font-normal text-slate-400">so'm yillik aylanma</span>
                   </p>
                 </div>
-                {yearly?.payments?.lastYearRevenue > 0 && (
-                  <div className="text-right bg-slate-50 rounded-xl px-3 py-2">
-                    <p className="text-[10px] text-slate-400 font-bold">
-                      {reportDate.year - 1}
-                    </p>
-                    <p className="text-sm font-black text-slate-500">
-                      {yearly.payments.lastYearRevenue.toLocaleString("ru-RU")}{" "}
-                      сум
+
+                {/* Yillik Sof Foyda va Maosh Bloklari */}
+                <div className="flex items-center gap-3">
+                  <div className="bg-rose-50 border border-rose-100 rounded-2xl px-4 py-2">
+                    <p className="text-[10px] text-rose-500 font-bold uppercase">Yillik O'qituvchilar Maoshi</p>
+                    <p className="text-sm font-black text-rose-600">
+                      - {Number(yearly?.payments?.yearlySalaries || 0).toLocaleString("ru-RU")} so'm
                     </p>
                   </div>
-                )}
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-2">
+                    <p className="text-[10px] text-emerald-600 font-bold uppercase">Yillik Sof Foyda</p>
+                    <p className="text-sm font-black text-emerald-700">
+                      {Number(yearly?.payments?.netProfit || 0).toLocaleString("ru-RU")} so'm
+                    </p>
+                  </div>
+                </div>
               </div>
+
               {yearly?.payments?.graphData?.length > 0 ? (
-                <ResponsiveContainer width="100%" height={160}>
+                <ResponsiveContainer width="100%" height={180}>
                   <BarChart
                     data={yearly.payments.graphData.map((d: any) => ({
                       ...d,
                       monthName: MONTHS[d.month - 1],
                     }))}
-                    barSize={20}
+                    barSize={22}
                   >
                     <XAxis
                       dataKey="monthName"
@@ -554,8 +571,8 @@ const FinancePage = () => {
                     <YAxis hide />
                     <Tooltip
                       formatter={(v: any) => [
-                        `${Number(v).toLocaleString("ru-RU")} сум`,
-                        "Daromad",
+                        `${Number(v).toLocaleString("ru-RU")} so'm`,
+                        "Aylanma",
                       ]}
                     />
                     <Bar dataKey="total" fill="#3b82f6" radius={[6, 6, 0, 0]} />
@@ -593,8 +610,8 @@ const FinancePage = () => {
                         <div
                           className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
                           style={{
-                            background: METHOD_COLORS[p.method] + "20",
-                            color: METHOD_COLORS[p.method],
+                            background: (METHOD_COLORS[p.method] || "#64748b") + "20",
+                            color: METHOD_COLORS[p.method] || "#64748b",
                           }}
                         >
                           {p.student?.stfirstName?.charAt(0) ?? "?"}
@@ -617,9 +634,8 @@ const FinancePage = () => {
                       <div className="flex items-center gap-2">
                         <StatusPill method={p.method} />
                         <p className="font-black text-sm text-green-600">
-                          {Number(p.amount).toLocaleString("ru-RU")} сум
+                          {Number(p.amount).toLocaleString("ru-RU")} so'm
                         </p>
-                        <ChevronRight size={14} className="text-slate-300" />
                       </div>
                     </div>
                   ))}
@@ -628,9 +644,7 @@ const FinancePage = () => {
                       onClick={() => setShowAllPayments(!showAllPayments)}
                       className="flex items-center justify-center gap-1 text-blue-600 text-xs font-black py-2 hover:bg-blue-50 rounded-xl transition"
                     >
-                      {showAllPayments
-                        ? "Kamroq ko'rsatish"
-                        : `Ko'proq ko'rsatish ▾`}
+                      {showAllPayments ? "Kamroq ko'rsatish" : `Ko'proq ko'rsatish ▾`}
                     </button>
                   )}
                 </div>
@@ -667,16 +681,13 @@ const FinancePage = () => {
                             <p className="font-bold text-sm text-slate-900">
                               {s.stfirstName} {s.stlastName}
                             </p>
-                            <p className="text-[10px] text-slate-400">
-                              {s.phone}
-                            </p>
+                            <p className="text-[10px] text-slate-400">{s.phone}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-0.5 bg-red-100 text-red-500 text-[10px] font-black rounded-lg">
                             Qarz
                           </span>
-                          <ChevronRight size={14} className="text-slate-300" />
                         </div>
                       </div>
                     ))}
@@ -692,7 +703,7 @@ const FinancePage = () => {
             {/* QUICK SUMMARY STRIP */}
             <div className="bg-white rounded-[24px] border border-slate-100 p-5">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                Qisqacha xulosa
+                Kunlik Aylanmalar Ko'rsatkichi
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
@@ -704,11 +715,11 @@ const FinancePage = () => {
                       .filter(
                         (p) =>
                           new Date(p.createdAt).toDateString() ===
-                          new Date().toDateString(),
+                          new Date().toDateString()
                       )
                       .reduce((s, p) => s + Number(p.amount), 0)
-                      .toLocaleString("ru-RU")} сум`,
-                    sub: "Daromad",
+                      .toLocaleString("ru-RU")} so'm`,
+                    sub: "Bugungi tushum",
                   },
                   {
                     icon: <Calendar size={16} className="text-blue-500" />,
@@ -724,31 +735,26 @@ const FinancePage = () => {
                         );
                       })
                       .reduce((s, p) => s + Number(p.amount), 0)
-                      .toLocaleString("ru-RU")} сум`,
-                    sub: "Daromad",
+                      .toLocaleString("ru-RU")} so'm`,
+                    sub: "Kechagi tushum",
                   },
                   {
                     icon: <DollarSign size={16} className="text-purple-500" />,
                     bg: "bg-purple-50",
                     label: "O'rtacha chek",
-                    value: `${avgTicket.toLocaleString("ru-RU")} сум`,
-                    sub: "Bu oy",
+                    value: `${avgTicket.toLocaleString("ru-RU")} so'm`,
+                    sub: "Bitta o'quvchidan",
                   },
                   {
-                    icon: <Users size={16} className="text-orange-500" />,
-                    bg: "bg-orange-50",
+                    icon: <Users size={16} className="text-amber-500" />,
+                    bg: "bg-amber-50",
                     label: "To'lamadilar",
                     value: `${summary?.debtorsCount ?? 0} o'quvchi`,
-                    sub: `${payments
-                      .slice(0, summary?.debtorsCount)
-                      .reduce((s, p) => s + Number(p.amount), 0)
-                      .toLocaleString("ru-RU")} сум miqdorida`,
+                    sub: "Kutilayotgan to'lovlar",
                   },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div
-                      className={`p-2.5 ${item.bg} rounded-xl flex-shrink-0`}
-                    >
+                    <div className={`p-2.5 ${item.bg} rounded-xl flex-shrink-0`}>
                       {item.icon}
                     </div>
                     <div>
@@ -787,25 +793,25 @@ const FinancePage = () => {
                 Jami daromad
               </p>
               <p className="text-xl font-black text-slate-900">
-                {totalRevenue.toLocaleString("ru-RU")} сум
+                {totalRevenue.toLocaleString("ru-RU")} so'm
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 {payments.length} ta to'lov
               </p>
             </div>
             <div className="bg-white rounded-[20px] border border-slate-100 p-5">
-              <div className="p-2.5 bg-orange-50 rounded-xl w-fit mb-3">
-                <Banknote size={18} className="text-orange-500" />
+              <div className="p-2.5 bg-amber-50 rounded-xl w-fit mb-3">
+                <Banknote size={18} className="text-amber-500" />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Naqt pul
+                Naqd pul
               </p>
               <p className="text-xl font-black text-slate-900">
                 {payments
                   .filter((p) => p.method === "cash")
                   .reduce((s, p) => s + Number(p.amount), 0)
                   .toLocaleString("ru-RU")}{" "}
-                сум
+                so'm
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 {payments.filter((p) => p.method === "cash").length} ta to'lov
@@ -819,7 +825,7 @@ const FinancePage = () => {
                 O'rtacha chek
               </p>
               <p className="text-xl font-black text-slate-900">
-                {avgTicket.toLocaleString("ru-RU")} сум
+                {avgTicket.toLocaleString("ru-RU")} so'm
               </p>
             </div>
           </div>
@@ -866,8 +872,8 @@ const FinancePage = () => {
                           <div
                             className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs flex-shrink-0"
                             style={{
-                              background: METHOD_COLORS[p.method] + "20",
-                              color: METHOD_COLORS[p.method],
+                              background: (METHOD_COLORS[p.method] || "#64748b") + "20",
+                              color: METHOD_COLORS[p.method] || "#64748b",
                             }}
                           >
                             {p.student?.stfirstName?.charAt(0) ?? "?"}
@@ -884,7 +890,7 @@ const FinancePage = () => {
                       </td>
                       <td className="px-5 py-4 font-black text-slate-900 text-sm">
                         {Number(p.amount).toLocaleString("ru-RU")}{" "}
-                        <span className="text-[10px] text-slate-400">сум</span>
+                        <span className="text-[10px] text-slate-400">so'm</span>
                       </td>
                       <td className="px-5 py-4 text-xs text-slate-400">
                         {new Date(p.createdAt).toLocaleDateString("ru-RU")}
