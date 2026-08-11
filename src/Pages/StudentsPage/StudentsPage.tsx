@@ -1,64 +1,97 @@
-import  { useEffect, useState } from 'react';
-import { Search, Plus, Filter, Phone, X, Trash2, Edit2, UserPlus, CreditCard, Calendar } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Search, Plus, Filter, Phone, X, Trash2, Edit2, UserPlus, CreditCard, Calendar, RotateCcw } from 'lucide-react';
 import { api } from '../../Shared/API/base';
 
+// ─── TYPES ───────────────────────────────────────────────────────────────────
 interface Group { id: string; groupName: string; }
-interface Payment { id: string; amount: number; method: string; comment?: string; createdAt: string; groupId?: string; }
-interface Student {
-  id: string;
-  stfirstName: string;
-  stlastName: string;
-  phone: string;
-  group?: Group[];
-  payments?: Payment[];
-}
+interface Payment { id: string; amount: number; method: string; comment?: string; createdAt: string; }
+interface Student { id: string; stfirstName: string; stlastName: string; phone: string; group?: Group[]; payments?: Payment[]; }
 
-interface StudentForm { stfirstName: string; stlastName: string; phone: string; }
-interface PaymentForm { amount: string; method: string; comment: string; groupId: string; }
+const METHOD_LABELS: Record<string, string> = { cash: 'Наличные', card: 'Карта', transfer: 'Перевод' };
+const METHOD_COLORS: Record<string, string> = { cash: 'bg-green-100 text-green-700', card: 'bg-blue-100 text-blue-700', transfer: 'bg-purple-100 text-purple-700' };
 
-const METHOD_LABELS: any = { cash: 'Наличные', card: 'Карта', transfer: 'Перевод' };
-const METHOD_COLORS: any = {
-  cash: 'bg-green-100 text-green-700',
-  card: 'bg-blue-100 text-blue-700',
-  transfer: 'bg-purple-100 text-purple-700',
+// ─── REUSABLE MODAL ──────────────────────────────────────────────────────────
+const Modal = ({ open, onClose, title, subtitle, children }: any) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-sm mx-4 p-8 z-10">
+        <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition">
+          <X size={18} />
+        </button>
+        <div className="mb-6">
+          <h2 className="text-2xl font-black text-slate-900">{title}</h2>
+          {subtitle && <p className="text-slate-400 text-sm mt-1">{subtitle}</p>}
+        </div>
+        {children}
+      </div>
+    </div>
+  );
 };
 
+// ─── FIELD ───────────────────────────────────────────────────────────────────
+const Field = ({ label, children }: any) => (
+  <div>
+    <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">{label}</label>
+    {children}
+  </div>
+);
+
+const Input = ({ ...props }) => (
+  <input className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium" {...props} />
+);
+
+const Select = ({ children, ...props }: any) => (
+  <select className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white" {...props}>
+    {children}
+  </select>
+);
+
+const Btn = ({ children, className = '', ...props }: any) => (
+  <button className={`w-full h-14 rounded-2xl font-bold transition disabled:opacity-50 ${className}`} {...props}>
+    {children}
+  </button>
+);
+
+// ─── MAIN ─────────────────────────────────────────────────────────────────────
 const StudentsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [filtered, setFiltered] = useState<Student[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-
   const [selected, setSelected] = useState<Student | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
-
-  const [createOpen, setCreateOpen] = useState(false);
-  const [studentForm, setStudentForm] = useState<StudentForm>({ stfirstName: '', stlastName: '', phone: '' });
-  const [selectedGroupId, setSelectedGroupId] = useState('');
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState('');
-
-  const [editOpen, setEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState<StudentForm>({ stfirstName: '', stlastName: '', phone: '' });
-  const [editing, setEditing] = useState(false);
-
-  const [addGroupOpen, setAddGroupOpen] = useState(false);
-  const [addGroupId, setAddGroupId] = useState('');
-  const [addingGroup, setAddingGroup] = useState(false);
-
-  const [paymentOpen, setPaymentOpen] = useState(false);
-  const [paymentForm, setPaymentForm] = useState<PaymentForm>({ amount: '', method: 'cash', comment: '', groupId: '' });
-  const [paying, setPaying] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
-
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [removingGroupId, setRemovingGroupId] = useState<string | null>(null);
 
+  // Modal states
+  const [modal, setModal] = useState<'create' | 'edit' | 'addGroup' | 'payment' | 'refund' | null>(null);
+  const closeModal = () => setModal(null);
+
+  // Forms
+  const [studentForm, setStudentForm] = useState({ stfirstName: '', stlastName: '', phone: '' });
+  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [editForm, setEditForm] = useState({ stfirstName: '', stlastName: '', phone: '' });
+  const [addGroupId, setAddGroupId] = useState('');
+  const [paymentForm, setPaymentForm] = useState({ amount: '', method: 'cash', comment: '', groupId: '' });
+  const [refundForm, setRefundForm] = useState({ paymentId: '', amount: 0, reason: '' });
+
+  // Loading states
+  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [addingGroup, setAddingGroup] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [refunding, setRefunding] = useState(false);
+
+  // Errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // ─── FETCH ─────────────────────────────────────────────────────────────────
   const fetchStudents = async () => {
     const { data } = await api.get('/students');
-    setStudents(data);
-    setFiltered(data);
+    setStudents(data); setFiltered(data);
   };
 
   const fetchStudent = async (id: string) => {
@@ -84,29 +117,18 @@ const StudentsPage = () => {
     ));
   }, [search, students]);
 
-  const getLastPaymentDate = (s: Student) => {
-    if (!s.payments?.length) return null;
-    const sorted = [...s.payments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return new Date(sorted[0].createdAt).toLocaleDateString('ru-RU');
-  };
-
+  // ─── HANDLERS ──────────────────────────────────────────────────────────────
   const handleCreate = async () => {
-    if (!studentForm.stfirstName || !studentForm.stlastName || !studentForm.phone) { setCreateError('Заполните все поля'); return; }
-    setCreating(true); setCreateError('');
+    if (!studentForm.stfirstName || !studentForm.stlastName || !studentForm.phone) {
+      return setErrors({ create: 'Заполните все поля' });
+    }
+    setCreating(true);
     try {
-      const { data: newStudent } = await api.post('/students', studentForm);
-      if (selectedGroupId) await api.post(`/groups/${selectedGroupId}/students`, { studentId: newStudent.id });
-      setCreateOpen(false);
-      fetchStudents();
-    } catch (e: any) {
-      setCreateError(e.response?.data?.message || 'Ошибка');
-    } finally { setCreating(false); }
-  };
-
-  const openEdit = () => {
-    if (!selected) return;
-    setEditForm({ stfirstName: selected.stfirstName, stlastName: selected.stlastName, phone: selected.phone });
-    setEditOpen(true);
+      const { data: s } = await api.post('/students', studentForm);
+      if (selectedGroupId) await api.post(`/groups/${selectedGroupId}/students`, { studentId: s.id });
+      closeModal(); fetchStudents();
+    } catch (e: any) { setErrors({ create: e.response?.data?.message || 'Ошибка' }); }
+    finally { setCreating(false); }
   };
 
   const handleEdit = async () => {
@@ -114,10 +136,8 @@ const StudentsPage = () => {
     setEditing(true);
     try {
       await api.patch(`/students/${selected.id}`, editForm);
-      setEditOpen(false);
-      fetchStudent(selected.id);
-      fetchStudents();
-    } catch (e: any) { console.error(e); }
+      closeModal(); fetchStudent(selected.id); fetchStudents();
+    } catch (e) { console.error(e); }
     finally { setEditing(false); }
   };
 
@@ -126,10 +146,8 @@ const StudentsPage = () => {
     setAddingGroup(true);
     try {
       await api.post(`/groups/${addGroupId}/students`, { studentId: selected.id });
-      setAddGroupOpen(false);
-      fetchStudent(selected.id);
-      fetchStudents();
-    } catch (e: any) { console.error(e); }
+      closeModal(); fetchStudent(selected.id); fetchStudents();
+    } catch (e) { console.error(e); }
     finally { setAddingGroup(false); }
   };
 
@@ -138,15 +156,14 @@ const StudentsPage = () => {
     setRemovingGroupId(groupId);
     try {
       await api.delete(`/groups/${groupId}/students/${selected.id}`);
-      fetchStudent(selected.id);
-      fetchStudents();
-    } catch (e: any) { console.error(e); }
+      fetchStudent(selected.id); fetchStudents();
+    } catch (e) { console.error(e); }
     finally { setRemovingGroupId(null); }
   };
 
   const handlePayment = async () => {
-    if (!paymentForm.amount || !selected) { setPaymentError('Введите сумму'); return; }
-    setPaying(true); setPaymentError('');
+    if (!paymentForm.amount || !selected) return setErrors({ payment: 'Введите сумму' });
+    setPaying(true);
     try {
       await api.post('/payments', {
         studentId: selected.id,
@@ -155,13 +172,22 @@ const StudentsPage = () => {
         comment: paymentForm.comment || undefined,
         groupId: paymentForm.groupId || undefined,
       });
-      setPaymentOpen(false);
+      closeModal();
       setPaymentForm({ amount: '', method: 'cash', comment: '', groupId: '' });
-      fetchStudent(selected.id);
-      fetchStudents();
-    } catch (e: any) {
-      setPaymentError(e.response?.data?.message || 'Ошибка');
-    } finally { setPaying(false); }
+      fetchStudent(selected.id); fetchStudents();
+    } catch (e: any) { setErrors({ payment: e.response?.data?.message || 'Ошибка' }); }
+    finally { setPaying(false); }
+  };
+
+  const handleRefund = async () => {
+    if (!refundForm.reason.trim()) return setErrors({ refund: 'Укажите причину' });
+    if (!selected) return;
+    setRefunding(true);
+    try {
+      await api.post('/payments/refund', { paymentId: refundForm.paymentId, reason: refundForm.reason });
+      closeModal(); fetchStudent(selected.id); fetchStudents();
+    } catch (e: any) { setErrors({ refund: e.response?.data?.message || 'Ошибка' }); }
+    finally { setRefunding(false); }
   };
 
   const handleDelete = async (id: string) => {
@@ -170,8 +196,13 @@ const StudentsPage = () => {
       await api.delete(`/students/${id}`);
       setStudents(prev => prev.filter(s => s.id !== id));
       if (selected?.id === id) setSelected(null);
-    } catch (e: any) { console.error(e); }
+    } catch (e) { console.error(e); }
     finally { setDeletingId(null); }
+  };
+
+  const getLastPayment = (s: Student) => {
+    if (!s.payments?.length) return null;
+    return [...s.payments].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
   };
 
   if (loading) return <div className="flex items-center justify-center h-96 text-slate-400 font-bold">Loading...</div>;
@@ -182,31 +213,30 @@ const StudentsPage = () => {
       {/* HEADER */}
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 mb-2">Students</h1>
-          <p className="text-slate-500 font-medium">Всего: {students.length} студентов</p>
+          <h1 className="text-2xl font-black text-slate-900 mb-1">Students</h1>
+          <p className="text-slate-500 font-medium">Всего: {students.length}</p>
         </div>
         <button
-          onClick={() => { setStudentForm({ stfirstName: '', stlastName: '', phone: '' }); setSelectedGroupId(''); setCreateError(''); setCreateOpen(true); }}
-          className="h-14  px-1 bg-blue-600 text-white text-0.5xl rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+          onClick={() => { setStudentForm({ stfirstName: '', stlastName: '', phone: '' }); setSelectedGroupId(''); setErrors({}); setModal('create'); }}
+          className="h-12 px-6 bg-blue-600 text-white rounded-2xl font-bold flex items-center gap-2 hover:bg-blue-700 transition shadow-lg shadow-blue-200"
         >
-          <Plus size={20} /> Add Student
+          <Plus size={18} /> Add Student
         </button>
       </div>
 
       {/* SEARCH */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-3 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
-            type="text"
             placeholder="Search by name, phone or group..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full h-14 pl-12 pr-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 transition-all shadow-sm"
+            className="w-full h-12 pl-11 pr-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-blue-500 transition shadow-sm"
           />
         </div>
-        <button className="h-14 px-6 bg-white border border-slate-200 rounded-2xl flex items-center gap-2 font-bold text-slate-600 hover:bg-slate-50">
-          <Filter size={20} /> Filters
+        <button className="h-12 px-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-2 font-bold text-slate-600 hover:bg-slate-50">
+          <Filter size={18} />
         </button>
       </div>
 
@@ -215,139 +245,132 @@ const StudentsPage = () => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-8 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Student</th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Groups</th>
-              <th className="px-6 py-5 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">Last Payment</th>
-              <th className="px-6 py-5 text-right text-xs font-bold text-slate-400 uppercase tracking-widest">Actions</th>
+              {['Student', 'Groups', 'Last Payment', ''].map(h => (
+                <th key={h} className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-widest">{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {filtered.map(student => (
-              <tr key={student.id} onClick={() => fetchStudent(student.id)} className="hover:bg-blue-50/30 transition-colors group cursor-pointer">
-                <td className="px-8 py-5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 border border-slate-200">
-                      {student.stfirstName.charAt(0)}
+            {filtered.map(student => {
+              const lastPayment = getLastPayment(student);
+              return (
+                <tr key={student.id} onClick={() => fetchStudent(student.id)} className="hover:bg-blue-50/30 transition-colors group cursor-pointer">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-500 flex-shrink-0">
+                        {student.stfirstName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors text-sm">
+                          {student.stfirstName} {student.stlastName}
+                        </p>
+                        <p className="text-xs text-slate-400 flex items-center gap-1">
+                          <Phone size={10} /> {student.phone}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        {student.stfirstName} {student.stlastName}
-                      </p>
-                      <p className="text-sm text-slate-500 flex items-center gap-1">
-                        <Phone size={12} /> {student.phone}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  {student.group?.length ? (
-                    <div className="flex flex-wrap gap-2">
-                      {student.group.map(g => (
-                        <span key={g.id} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100">
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {student.group?.map(g => (
+                        <span key={g.id} className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100">
                           {g.groupName}
                         </span>
-                      ))}
+                      )) || <span className="text-slate-300 text-sm">—</span>}
                     </div>
-                  ) : <span className="text-slate-300 text-sm">—</span>}
-                </td>
-                <td className="px-6 py-5">
-                  {getLastPaymentDate(student) ? (
-                    <div className="flex items-center gap-2 text-slate-600 font-medium text-sm">
-                      <Calendar size={14} className="text-blue-400" />
-                      {getLastPaymentDate(student)}
-                    </div>
-                  ) : (
-                    <span className="text-slate-300 text-sm">—</span>
-                  )}
-                </td>
-                <td className="px-6 py-5 text-right" onClick={e => e.stopPropagation()}>
-                  <button
-                    onClick={() => handleDelete(student.id)}
-                    disabled={deletingId === student.id}
-                    className="p-2 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100 text-slate-400 hover:text-red-500 transition-all disabled:opacity-50"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-6 py-4">
+                    {lastPayment ? (
+                      <div className="flex items-center gap-1.5 text-slate-600 text-sm">
+                        <Calendar size={12} className="text-blue-400" />
+                        {new Date(lastPayment.createdAt).toLocaleDateString('ru-RU')}
+                      </div>
+                    ) : <span className="text-slate-300 text-sm">—</span>}
+                  </td>
+                  <td className="px-6 py-4 text-right" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleDelete(student.id)}
+                      disabled={deletingId === student.id}
+                      className="p-2 hover:bg-red-50 rounded-xl text-slate-300 hover:text-red-500 transition disabled:opacity-50"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
             {filtered.length === 0 && (
-              <tr><td colSpan={4} className="px-8 py-16 text-center text-slate-300 font-bold text-lg">Студенты не найдены</td></tr>
+              <tr><td colSpan={4} className="py-16 text-center text-slate-300 font-bold">Студенты не найдены</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* ─── DRAWER ─── */}
+      {/* ─── DRAWER ──────────────────────────────────────────────────────────── */}
       {selected && (
         <>
           <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={() => setSelected(null)} />
           <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
 
-            <div className="p-8 border-b border-slate-100 flex items-start justify-between">
+            {/* Header */}
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl font-black">
+                <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-xl font-black flex-shrink-0">
                   {selected.stfirstName.charAt(0)}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900">{selected.stfirstName} {selected.stlastName}</h2>
-                  <p className="text-slate-500 flex items-center gap-1 text-sm mt-1"><Phone size={12} /> {selected.phone}</p>
+                  <h2 className="text-xl font-black text-slate-900">{selected.stfirstName} {selected.stlastName}</h2>
+                  <p className="text-slate-400 text-xs flex items-center gap-1 mt-0.5"><Phone size={10} /> {selected.phone}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button onClick={openEdit} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition">
-                  <Edit2 size={18} />
+              <div className="flex gap-1">
+                <button onClick={() => { setEditForm({ stfirstName: selected.stfirstName, stlastName: selected.stlastName, phone: selected.phone }); setModal('edit'); }}
+                  className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition">
+                  <Edit2 size={16} />
                 </button>
-                <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition">
-                  <X size={18} />
+                <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition">
+                  <X size={16} />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8">
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
               {drawerLoading ? (
-                <div className="flex items-center justify-center h-32 text-slate-400 font-bold">Loading...</div>
+                <div className="flex items-center justify-center h-32 text-slate-400">Loading...</div>
               ) : (
                 <>
                   {/* Groups */}
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-black text-slate-900 uppercase tracking-widest text-xs">Группы</h3>
-                      <button onClick={() => { setAddGroupId(''); setAddGroupOpen(true); }} className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline">
-                        <UserPlus size={14} /> Добавить
+                    <div className="flex justify-between items-center mb-3">
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Группы</p>
+                      <button onClick={() => { setAddGroupId(''); setModal('addGroup'); }}
+                        className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline">
+                        <UserPlus size={12} /> Добавить
                       </button>
                     </div>
                     {selected.group?.length ? (
                       <div className="flex flex-col gap-2">
                         {selected.group.map(g => (
                           <div key={g.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-2xl">
-                            <span className="font-bold text-slate-700">{g.groupName}</span>
-                            <button
-                              onClick={() => handleRemoveGroup(g.id)}
-                              disabled={removingGroupId === g.id}
-                              className="text-slate-300 hover:text-red-500 transition disabled:opacity-50"
-                            >
-                              {removingGroupId === g.id ? '...' : <X size={14} />}
+                            <span className="font-bold text-slate-700 text-sm">{g.groupName}</span>
+                            <button onClick={() => handleRemoveGroup(g.id)} disabled={removingGroupId === g.id}
+                              className="text-slate-300 hover:text-red-500 transition text-xs">
+                              {removingGroupId === g.id ? '...' : <X size={13} />}
                             </button>
                           </div>
                         ))}
                       </div>
-                    ) : <p className="text-slate-400 text-sm">Не добавлен ни в одну группу</p>}
+                    ) : <p className="text-slate-400 text-sm">Не в группе</p>}
                   </div>
 
                   {/* Payments */}
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-black text-slate-900 uppercase tracking-widest text-xs">Платежи</h3>
+                    <div className="flex justify-between items-center mb-3">
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Платежи</p>
                       <button
-                        onClick={() => {
-                          setPaymentForm({ amount: '', method: 'cash', comment: '', groupId: selected.group?.[0]?.id ?? '' });
-                          setPaymentError('');
-                          setPaymentOpen(true);
-                        }}
-                        className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline"
-                      >
-                        <CreditCard size={14} /> Принять оплату
+                        onClick={() => { setPaymentForm({ amount: '', method: 'cash', comment: '', groupId: selected.group?.[0]?.id ?? '' }); setErrors({}); setModal('payment'); }}
+                        className="flex items-center gap-1 text-blue-600 text-xs font-black hover:underline">
+                        <CreditCard size={12} /> Принять
                       </button>
                     </div>
                     {selected.payments?.length ? (
@@ -357,12 +380,22 @@ const StudentsPage = () => {
                           .map(p => (
                             <div key={p.id} className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-2xl">
                               <div>
-                                <p className="font-black text-slate-900">{Number(p.amount).toLocaleString('ru-RU')} сум</p>
+                                <p className="font-black text-slate-900 text-sm">{Number(p.amount).toLocaleString('ru-RU')} сум</p>
                                 <p className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleDateString('ru-RU')}</p>
+                                {p.comment && <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[180px]">💬 {p.comment}</p>}
                               </div>
-                              <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase ${METHOD_COLORS[p.method]}`}>
-                                {METHOD_LABELS[p.method]}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase ${METHOD_COLORS[p.method]}`}>
+                                  {METHOD_LABELS[p.method]}
+                                </span>
+                                <button
+                                  onClick={() => { setRefundForm({ paymentId: p.id, amount: p.amount, reason: '' }); setErrors({}); setModal('refund'); }}
+                                  className="p-1.5 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-xl transition"
+                                  title="Возврат"
+                                >
+                                  <RotateCcw size={13} />
+                                </button>
+                              </div>
                             </div>
                           ))}
                       </div>
@@ -375,180 +408,110 @@ const StudentsPage = () => {
         </>
       )}
 
-      {/* ─── CREATE MODAL ─── */}
-      {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setCreateOpen(false)} />
-          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md mx-4 p-8 z-10">
-            <button onClick={() => setCreateOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-slate-900">New Student</h2>
-              <p className="text-slate-400 font-medium mt-1">Добавьте нового студента</p>
-            </div>
-            <div className="flex flex-col gap-4">
-              {[
-                { label: 'First Name', key: 'stfirstName', placeholder: 'Жасур' },
-                { label: 'Last Name', key: 'stlastName', placeholder: 'Рахимов' },
-                { label: 'Phone', key: 'phone', placeholder: '+998901234567' },
-              ].map(({ label, key, placeholder }) => (
-                <div key={key}>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">{label}</label>
-                  <input
-                    className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium"
-                    placeholder={placeholder}
-                    value={studentForm[key as keyof StudentForm]}
-                    onChange={e => setStudentForm({ ...studentForm, [key]: e.target.value })}
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">
-                  Group <span className="text-slate-300 normal-case font-medium">(необязательно)</span>
-                </label>
-                <select
-                  className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white"
-                  value={selectedGroupId}
-                  onChange={e => setSelectedGroupId(e.target.value)}
-                >
-                  <option value="">Без группы</option>
-                  {groups.map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
-                </select>
-              </div>
-              {createError && <p className="text-red-500 text-sm font-medium">{createError}</p>}
-              <button onClick={handleCreate} disabled={creating} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition disabled:opacity-50 mt-2">
-                {creating ? 'Создание...' : 'Add Student'}
-              </button>
-            </div>
-          </div>
+      {/* ─── MODALS ──────────────────────────────────────────────────────────── */}
+
+      {/* Create Student */}
+      <Modal open={modal === 'create'} onClose={closeModal} title="New Student" subtitle="Добавьте нового студента">
+        <div className="flex flex-col gap-4">
+          {[{ label: 'First Name', key: 'stfirstName', placeholder: 'Жасур' }, { label: 'Last Name', key: 'stlastName', placeholder: 'Рахимов' }, { label: 'Phone', key: 'phone', placeholder: '+998901234567' }].map(({ label, key, placeholder }) => (
+            <Field key={key} label={label}>
+              <Input placeholder={placeholder} value={studentForm[key as keyof typeof studentForm]}
+                onChange={(e: any) => setStudentForm({ ...studentForm, [key]: e.target.value })} />
+            </Field>
+          ))}
+          <Field label="Group (необязательно)">
+            <Select value={selectedGroupId} onChange={(e: any) => setSelectedGroupId(e.target.value)}>
+              <option value="">Без группы</option>
+              {groups.map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
+            </Select>
+          </Field>
+          {errors.create && <p className="text-red-500 text-sm">{errors.create}</p>}
+          <Btn onClick={handleCreate} disabled={creating} className="bg-blue-600 text-white hover:bg-blue-700">
+            {creating ? 'Создание...' : 'Add Student'}
+          </Btn>
         </div>
-      )}
+      </Modal>
 
-      {/* ─── EDIT MODAL ─── */}
-      {editOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditOpen(false)} />
-          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md mx-4 p-8 z-10">
-            <button onClick={() => setEditOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
-            <div className="mb-8"><h2 className="text-3xl font-black text-slate-900">Edit Student</h2></div>
-            <div className="flex flex-col gap-4">
-              {[
-                { label: 'First Name', key: 'stfirstName' },
-                { label: 'Last Name', key: 'stlastName' },
-                { label: 'Phone', key: 'phone' },
-              ].map(({ label, key }) => (
-                <div key={key}>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">{label}</label>
-                  <input
-                    className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium"
-                    value={editForm[key as keyof StudentForm]}
-                    onChange={e => setEditForm({ ...editForm, [key]: e.target.value })}
-                  />
-                </div>
-              ))}
-              <button onClick={handleEdit} disabled={editing} className="w-full h-14 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition disabled:opacity-50 mt-2">
-                {editing ? 'Сохранение...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
+      {/* Edit Student */}
+      <Modal open={modal === 'edit'} onClose={closeModal} title="Edit Student">
+        <div className="flex flex-col gap-4">
+          {[{ label: 'First Name', key: 'stfirstName' }, { label: 'Last Name', key: 'stlastName' }, { label: 'Phone', key: 'phone' }].map(({ label, key }) => (
+            <Field key={key} label={label}>
+              <Input value={editForm[key as keyof typeof editForm]}
+                onChange={(e: any) => setEditForm({ ...editForm, [key]: e.target.value })} />
+            </Field>
+          ))}
+          <Btn onClick={handleEdit} disabled={editing} className="bg-slate-900 text-white hover:bg-slate-800">
+            {editing ? 'Сохранение...' : 'Save Changes'}
+          </Btn>
         </div>
-      )}
+      </Modal>
 
-      {/* ─── ADD TO GROUP MODAL ─── */}
-      {addGroupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAddGroupOpen(false)} />
-          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-sm mx-4 p-8 z-10">
-            <button onClick={() => setAddGroupOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
-            <div className="mb-8"><h2 className="text-3xl font-black text-slate-900">Add to Group</h2></div>
-            <div className="flex flex-col gap-4">
-              <select
-                className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white"
-                value={addGroupId}
-                onChange={e => setAddGroupId(e.target.value)}
-              >
-                <option value="">Выберите группу</option>
-                {groups
-                  .filter(g => !selected?.group?.some(sg => sg.id === g.id))
-                  .map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
-              </select>
-              <button onClick={handleAddGroup} disabled={addingGroup || !addGroupId} className="w-full h-14 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition disabled:opacity-50">
-                {addingGroup ? 'Добавление...' : 'Add to Group'}
-              </button>
-            </div>
-          </div>
+      {/* Add to Group */}
+      <Modal open={modal === 'addGroup'} onClose={closeModal} title="Add to Group">
+        <div className="flex flex-col gap-4">
+          <Select value={addGroupId} onChange={(e: any) => setAddGroupId(e.target.value)}>
+            <option value="">Выберите группу</option>
+            {groups.filter(g => !selected?.group?.some(sg => sg.id === g.id)).map(g => (
+              <option key={g.id} value={g.id}>{g.groupName}</option>
+            ))}
+          </Select>
+          <Btn onClick={handleAddGroup} disabled={addingGroup || !addGroupId} className="bg-blue-600 text-white hover:bg-blue-700">
+            {addingGroup ? 'Добавление...' : 'Add to Group'}
+          </Btn>
         </div>
-      )}
+      </Modal>
 
-      {/* ─── PAYMENT MODAL ─── */}
-      {paymentOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPaymentOpen(false)} />
-          <div className="relative bg-white rounded-[32px] shadow-2xl w-full max-w-sm mx-4 p-8 z-10">
-            <button onClick={() => setPaymentOpen(false)} className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition"><X size={18} /></button>
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-slate-900">Accept Payment</h2>
-              <p className="text-slate-400 font-medium mt-1">{selected?.stfirstName} {selected?.stlastName}</p>
-            </div>
-            <div className="flex flex-col gap-4">
-
-              {/* Group selector */}
-              {selected?.group && selected.group.length > 0 && (
-                <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">
-                    For Group <span className="text-slate-300 normal-case font-medium">(необязательно)</span>
-                  </label>
-                  <select
-                    className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white"
-                    value={paymentForm.groupId}
-                    onChange={e => setPaymentForm({ ...paymentForm, groupId: e.target.value })}
-                  >
-                    <option value="">Не указывать</option>
-                    {selected.group.map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Amount (sum)</label>
-                <input
-                  className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium"
-                  placeholder="1200000"
-                  type="number"
-                  value={paymentForm.amount}
-                  onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">Method</label>
-                <select
-                  className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium bg-white"
-                  value={paymentForm.method}
-                  onChange={e => setPaymentForm({ ...paymentForm, method: e.target.value })}
-                >
-                  <option value="cash">Наличные</option>
-                  <option value="card">Карта</option>
-                  <option value="transfer">Перевод</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 block">
-                  Comment <span className="text-slate-300 normal-case font-medium">(необязательно)</span>
-                </label>
-                <input
-                  className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-blue-400 outline-none font-medium"
-                  placeholder="Оплата за март"
-                  value={paymentForm.comment}
-                  onChange={e => setPaymentForm({ ...paymentForm, comment: e.target.value })}
-                />
-              </div>
-              {paymentError && <p className="text-red-500 text-sm font-medium">{paymentError}</p>}
-              <button onClick={handlePayment} disabled={paying} className="w-full h-14 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition disabled:opacity-50">
-                {paying ? 'Обработка...' : 'Accept Payment'}
-              </button>
-            </div>
-          </div>
+      {/* Payment */}
+      <Modal open={modal === 'payment'} onClose={closeModal} title="Accept Payment" subtitle={`${selected?.stfirstName} ${selected?.stlastName}`}>
+        <div className="flex flex-col gap-4">
+          {selected?.group && selected.group.length > 0 && (
+            <Field label="For Group (необязательно)">
+              <Select value={paymentForm.groupId} onChange={(e: any) => setPaymentForm({ ...paymentForm, groupId: e.target.value })}>
+                <option value="">Не указывать</option>
+                {selected.group.map(g => <option key={g.id} value={g.id}>{g.groupName}</option>)}
+              </Select>
+            </Field>
+          )}
+          <Field label="Amount (sum)">
+            <Input type="number" placeholder="1200000" value={paymentForm.amount}
+              onChange={(e: any) => setPaymentForm({ ...paymentForm, amount: e.target.value })} />
+          </Field>
+          <Field label="Method">
+            <Select value={paymentForm.method} onChange={(e: any) => setPaymentForm({ ...paymentForm, method: e.target.value })}>
+              <option value="cash">Наличные</option>
+              <option value="card">Карта</option>
+              <option value="transfer">Перевод</option>
+            </Select>
+          </Field>
+          <Field label="Comment (необязательно)">
+            <Input placeholder="Оплата за март" value={paymentForm.comment}
+              onChange={(e: any) => setPaymentForm({ ...paymentForm, comment: e.target.value })} />
+          </Field>
+          {errors.payment && <p className="text-red-500 text-sm">{errors.payment}</p>}
+          <Btn onClick={handlePayment} disabled={paying} className="bg-green-600 text-white hover:bg-green-700">
+            {paying ? 'Обработка...' : 'Accept Payment'}
+          </Btn>
         </div>
-      )}
+      </Modal>
+
+      {/* Refund */}
+      <Modal open={modal === 'refund'} onClose={closeModal} title="Возврат" subtitle={`Сумма: ${refundForm.amount.toLocaleString('ru-RU')} сум`}>
+        <div className="flex flex-col gap-4">
+          <Field label="Причина *">
+            <textarea
+              className="w-full border border-slate-200 p-4 rounded-2xl focus:ring-2 focus:ring-red-400 outline-none font-medium min-h-[90px] resize-none"
+              placeholder="Причина возврата..."
+              value={refundForm.reason}
+              onChange={e => setRefundForm({ ...refundForm, reason: e.target.value })}
+            />
+          </Field>
+          {errors.refund && <p className="text-red-500 text-sm">{errors.refund}</p>}
+          <Btn onClick={handleRefund} disabled={refunding} className="bg-red-600 text-white hover:bg-red-700">
+            {refunding ? 'Обработка...' : 'Подтвердить возврат'}
+          </Btn>
+        </div>
+      </Modal>
 
     </div>
   );
