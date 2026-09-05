@@ -8,12 +8,17 @@ interface Props {
 const ProtectedRoute = ({ children, roles }: Props) => {
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/auth?mode=login" replace />;
 
   if (roles && !roles.includes(user.role)) {
-    // Редиректим на нужный дашборд в зависимости от роли
-    if (user.role === 'teacher') return <Navigate to="/teacher/dashboard" replace />;
-    return <Navigate to="/dashboard" replace />;
+    // 🔴 HAR BIR ROL UCHUN ANIQ MARSHRUTNI KO'RSATING:
+    if (user.role === 'owner' || user.role === 'admin') {
+      return <Navigate to="/dashboard" replace />;
+    }
+    if (user.role === 'teacher') {
+      return <Navigate to="/teacher/dashboard" replace />;
+    }
+    return <Navigate to="/auth" replace />;
   }
 
   return <>{children}</>;
